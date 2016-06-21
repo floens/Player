@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<org.floens.player.layout.PlayerControls xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/player_controls"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom|center_horizontal"
+    android:layout_margin="12dp"
+    android:clipChildren="false"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:maxLines="1"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingTop="4dp"
+        android:text="@string/dummy_title"
+        android:textColor="#ffffff"
+        android:textSize="14sp" />
+
+    <org.floens.player.view.Seeker
+        android:id="@+id/seeker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp" />
+
+    <org.floens.player.layout.PlayerControlsButtons
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingBottom="4dp"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp">
+
+        <org.floens.player.view.ReactiveButton
+            android:id="@+id/button_prev"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="8dp" />
+
+        <org.floens.player.view.ReactiveButton
+            android:id="@+id/button_play_pause"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp" />
+
+        <org.floens.player.view.ReactiveButton
+            android:id="@+id/button_next"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="16dp" />
+
+    </org.floens.player.layout.PlayerControlsButtons>
+
+</org.floens.player.layout.PlayerControls>

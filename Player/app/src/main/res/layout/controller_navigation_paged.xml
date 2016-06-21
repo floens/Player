@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<org.floens.controller.ui.layout.TouchBlockingFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/paged_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!--<org.floens.controller.toolbar.Toolbar-->
+    <!--android:id="@+id/toolbar"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="@dimen/toolbar_height"-->
+    <!--android:background="#ff000000" />-->
+
+    <include
+        layout="@layout/layout_player_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/music_bar_height"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="@dimen/bottom_bar_height" />
+
+    <org.floens.player.view.BottomBar
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottom_bar_height"
+        android:layout_gravity="bottom"
+        android:background="#ffffffff"
+        android:elevation="8dp" />
+
+</org.floens.controller.ui.layout.TouchBlockingFrameLayout>
