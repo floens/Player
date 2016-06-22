@@ -23,7 +23,7 @@ public class Slider extends View {
 
     private Paint thumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private final int totalHeight = dp(32);
+    private int drawY = dp(12);
     private final int barHeight = dp(2);
     private final int thumbUpRadius = dp(6);
     private final int thumbDownRadius = dp(8);
@@ -153,7 +153,8 @@ public class Slider extends View {
 
         canvas.save();
         canvas.translate(getPaddingLeft(), getPaddingTop());
-        int barY = (int) (height / 2f - barHeight / 2f);
+//        int barY = (int) (height / 2f - barHeight / 2f);
+        int barY = drawY;
 
         pastRect.set(0, barY, posX, barY + barHeight);
         pastPaint.setColor(pastColor);
@@ -164,13 +165,8 @@ public class Slider extends View {
         canvas.drawRect(backgroundRect, backgroundPaint);
 
         thumbPaint.setColor(thumbColor);
-        canvas.drawCircle(posX, height / 2, thumbRadius, thumbPaint);
+        canvas.drawCircle(posX, barY, thumbRadius, thumbPaint);
         canvas.restore();
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(totalHeight, MeasureSpec.EXACTLY));
     }
 
     private int getThumbX() {

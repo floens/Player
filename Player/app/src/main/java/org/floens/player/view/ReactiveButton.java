@@ -55,8 +55,11 @@ public class ReactiveButton extends View implements View.OnClickListener {
     }
 
     public void setSelected(int selected) {
-        this.selected = selected;
-        drawable = drawables.get(selected);
+        if (this.selected != selected) {
+            this.selected = selected;
+            drawable = drawables.get(selected);
+            invalidate();
+        }
     }
 
     @Override

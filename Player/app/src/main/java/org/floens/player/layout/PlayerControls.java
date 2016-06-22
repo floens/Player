@@ -1,11 +1,15 @@
 package org.floens.player.layout;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -16,19 +20,25 @@ import org.floens.player.view.Seeker;
 import static org.floens.controller.AndroidUtils.dp;
 
 public class PlayerControls extends LinearLayout implements ReactiveButton.Callback {
-    private static final int MAX_WIDTH = 400;
+    private static final int MAX_WIDTH = 500;
 
     private float borderRadius = dp(25);
     private float borderWidth;
     private Paint borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private int borderAlpha = 0xaa;
     private RectF fillRect = new RectF();
     private Paint fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private int fillAlpha = 0xdd;
 
     private TextView title;
     private Seeker seeker;
     private ReactiveButton prevButton;
     private ReactiveButton nextButton;
     private ReactiveButton playPauseButton;
+
+    private boolean hidden = false;
+    private ValueAnimator alphaAnimator;
+    private float drawnAlpha = 1f;
 
     private Callback callback;
 
@@ -49,7 +59,7 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
         borderPaint.setStyle(Paint.Style.STROKE);
         borderPaint.setStrokeWidth(borderWidth);
         borderPaint.setPathEffect(new CornerPathEffect(borderRadius));
-        fillPaint.setColor(0x22ffffff);
+        fillPaint.setColor(0xdd000000);
         fillPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         fillPaint.setStrokeWidth(borderWidth);
         fillPaint.setPathEffect(new CornerPathEffect(borderRadius));
@@ -57,8 +67,59 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
         setPadding(p, p, p, p);
     }
 
+    public void setHidden(boolean hidden, boolean animate) {
+        if (this.hidden != hidden) {
+            this.hidden = hidden;
+
+            float targetAlpha = hidden ? 0f : 1f;
+            if (animate) {
+                if (alphaAnimator != null) {
+                    alphaAnimator.cancel();
+                }
+                alphaAnimator = ValueAnimator.ofFloat(drawnAlpha, targetAlpha);
+                alphaAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        drawnAlpha = (float) animation.getAnimatedValue();
+                        setAlpha(drawnAlpha);
+                        invalidate();
+                    }
+                });
+
+                if (hidden) {
+                    alphaAnimator.setStartDelay(100);
+                    alphaAnimator.setDuration(250);
+                    alphaAnimator.setInterpolator(new AccelerateInterpolator(1.5f));
+                } else {
+                    alphaAnimator.setDuration(250);
+                    alphaAnimator.setInterpolator(new DecelerateInterpolator(1.5f));
+                }
+                alphaAnimator.start();
+            } else {
+                setAlpha(targetAlpha);
+                drawnAlpha = targetAlpha;
+            }
+            invalidate();
+        }
+    }
+
+    public void setPlaying(boolean playing) {
+        playPauseButton.setSelected(playing ? 1 : 0);
+    }
+
     public void setCallback(Callback callback) {
         this.callback = callback;
+    }
+
+    @Override
+    public boolean hasOverlappingRendering() {
+        return false;
+    }
+
+    @Override
+    public void setAlpha(float alpha) {
+        super.setAlpha(alpha);
+        setVisibility(alpha == 0f ? GONE : VISIBLE);
     }
 
     @Override
@@ -90,9 +151,19 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
     }
 
     @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        super.onTouchEvent(event);
+        return true;
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
+//        if (drawnAlpha > 0f) {
+//            fillPaint.setAlpha((int) (drawnAlpha * fillAlpha));
+//            borderPaint.setAlpha((int) (drawnAlpha * borderAlpha));
         canvas.drawRect(fillRect, fillPaint);
         canvas.drawRect(fillRect, borderPaint);
+//        }
 
         super.onDraw(canvas);
     }

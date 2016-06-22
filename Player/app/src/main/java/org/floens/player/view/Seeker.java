@@ -7,12 +7,14 @@ import android.util.AttributeSet;
 
 import org.floens.player.layout.Slider;
 
+import static org.floens.controller.AndroidUtils.dp;
 import static org.floens.controller.AndroidUtils.sp;
 
 public class Seeker extends Slider {
     private Paint timePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private final int timeTextSize = sp(12);
+    private final int timeWidth = dp(42 - 12);
 
     public Seeker(Context context) {
         this(context, null);
@@ -37,12 +39,12 @@ public class Seeker extends Slider {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        int left = getPaddingLeft();
-        int right = getWidth() - getPaddingRight();
-        int y = getHeight() + timeTextSize / 2;
+        int left = timeWidth;
+        int right = getWidth() - timeWidth;
+        int y = getHeight() / 2 + timeTextSize / 2;
 
-        drawTime(canvas, "1:49", left, y, false);
-        drawTime(canvas, "2:34", right, y, true);
+        drawTime(canvas, "1:49", left, y, true);
+        drawTime(canvas, "2:34", right, y, false);
     }
 
     private void drawTime(Canvas canvas, String text, int x, int y, boolean floatRight) {
