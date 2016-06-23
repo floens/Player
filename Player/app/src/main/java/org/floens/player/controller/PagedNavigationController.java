@@ -11,11 +11,13 @@ import org.floens.controller.ControllerTransition;
 import org.floens.controller.transition.FadeInTransition;
 import org.floens.player.R;
 import org.floens.player.ViewPagerAdapter;
+import org.floens.player.layout.InsetsBarsFrameLayout;
 import org.floens.player.layout.PlayerBar;
 import org.floens.player.view.BottomBar;
 import org.floens.player.view.BottomBarItem;
 
 public class PagedNavigationController extends Controller implements View.OnClickListener, ViewPager.OnPageChangeListener, BottomBar.BottomBarCallback {
+    private InsetsBarsFrameLayout insetsFrameLayout;
     private ViewPager viewPager;
 
     private PlayerBar playerBar;
@@ -30,6 +32,8 @@ public class PagedNavigationController extends Controller implements View.OnClic
         super.onCreate();
 
         view = inflateRes(R.layout.controller_navigation_paged);
+        insetsFrameLayout = (InsetsBarsFrameLayout) view;
+        insetsFrameLayout.setDrawBars(true, false, true, true);
         viewPager = (ViewPager) view.findViewById(R.id.paged_container);
         viewPager.setAdapter(new PagedNavigationControllerAdapter());
         viewPager.addOnPageChangeListener(this);

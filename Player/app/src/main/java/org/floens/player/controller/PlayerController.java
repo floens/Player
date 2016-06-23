@@ -8,11 +8,13 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import org.floens.controller.Controller;
 import org.floens.controller.transition.FadeOutTransition;
 import org.floens.controller.ui.drawable.ArrowMenuDrawable;
+import org.floens.player.InsetsHelper;
 import org.floens.player.R;
 import org.floens.player.layout.PlayerControllerContainer;
 import org.floens.player.layout.PlayerControls;
@@ -27,6 +29,7 @@ public class PlayerController extends Controller implements View.OnClickListener
     private PlayerControllerContainer container;
     private ImageView playerSurface;
     private ImageView back;
+    private ViewGroup controlsContainer;
     private PlayerControls playerControls;
 
     private boolean playing = false;
@@ -54,6 +57,9 @@ public class PlayerController extends Controller implements View.OnClickListener
         container = (PlayerControllerContainer) view;
         container.setCallback(this);
 
+        controlsContainer = (ViewGroup) view.findViewById(R.id.controls_container);
+        InsetsHelper.attachInsetsMargin(controlsContainer, true, true, true, true);
+
         playerSurface = (ImageView) view.findViewById(R.id.player_surface);
         playerSurface.setImageURI(Uri.parse("file:///sdcard/Pictures/pic.jpg"));
 
@@ -77,6 +83,12 @@ public class PlayerController extends Controller implements View.OnClickListener
         });
 
         handler = new Handler();
+    }
+
+    @Override
+    public void onShow() {
+        super.onShow();
+        view.requestApplyInsets();
     }
 
     @Override

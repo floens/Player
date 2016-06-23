@@ -12,7 +12,6 @@
         android:layout_height="match_parent"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:fitsSystemWindows="true"
         android:paddingBottom="@dimen/content_padding_bottom" />
 
 </org.floens.player.layout.PlaylistLayout>

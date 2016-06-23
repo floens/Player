@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 
 import org.floens.controller.Controller;
 import org.floens.controller.transition.FadeInTransition;
+import org.floens.player.InsetsHelper;
 import org.floens.player.R;
 import org.floens.player.adapter.PlaylistAdapter;
 import org.floens.player.layout.PlaylistLayout;
@@ -30,7 +31,7 @@ public class PlaylistController extends Controller implements PlaylistAdapter.Ca
         bottomBarItem.drawable = context.getResources().getDrawable(R.drawable.ic_audiotrack_black_24dp, null);
 
         playlistLayout = (PlaylistLayout) inflateRes(R.layout.layout_playlist);
-        playlistLayout.requestApplyInsets();
+        InsetsHelper.attachInsetsPadding(playlistLayout.getRecyclerView(), false, true, false, true);
         view = playlistLayout;
 
         playlistLayout.getRecyclerView().setLayoutManager(new LinearLayoutManager(context));

@@ -21,8 +21,6 @@ public class PlayerActivity extends StartActivity {
         attributes.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
         window.setAttributes(attributes);
 
-//        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         NavigationController mainController = new MainNavigationController(this);
         this.mainController = mainController;
 
@@ -38,13 +36,5 @@ public class PlayerActivity extends StartActivity {
         for (int i = 0; i < 3; i++) {
             pagedNavigationController.addController(new PlaylistController(this));
         }
-        /*mainController.view.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-            @Override
-            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-                Log.d(TAG, "onApplyWindowInsets() called with: v = [" + v + "], insets = [" + insets + "]");
-                return insets.consumeSystemWindowInsets();
-            }
-        });*/
-        mainController.view.requestApplyInsets();
     }
 }
