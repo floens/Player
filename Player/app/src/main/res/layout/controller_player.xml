@@ -9,12 +9,19 @@
         android:layout_height="match_parent"
         android:background="#ff000000" />
 
-    <include layout="@layout/layout_player_controls" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
-    <ImageView
-        android:id="@+id/back"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:scaleType="center" />
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:scaleType="center" />
+
+        <include layout="@layout/layout_player_controls" />
+
+    </FrameLayout>
 
 </org.floens.player.layout.PlayerControllerContainer>

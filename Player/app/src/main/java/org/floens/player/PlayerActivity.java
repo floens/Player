@@ -1,6 +1,7 @@
 package org.floens.player;
 
 import android.os.Bundle;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -11,6 +12,8 @@ import org.floens.player.controller.PagedNavigationController;
 import org.floens.player.controller.PlaylistController;
 
 public class PlayerActivity extends StartActivity {
+    private static final String TAG = "PlayerActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Window window = getWindow();
@@ -20,16 +23,28 @@ public class PlayerActivity extends StartActivity {
 
 //        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        mainController = new MainNavigationController(this);
+        NavigationController mainController = new MainNavigationController(this);
+        this.mainController = mainController;
 
         super.onCreate(savedInstanceState);
 
-        NavigationController mainController = (NavigationController) this.mainController;
+        mainController.view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+
         PagedNavigationController pagedNavigationController = new PagedNavigationController(this);
         mainController.pushController(pagedNavigationController, false);
 
         for (int i = 0; i < 3; i++) {
             pagedNavigationController.addController(new PlaylistController(this));
         }
+        /*mainController.view.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                Log.d(TAG, "onApplyWindowInsets() called with: v = [" + v + "], insets = [" + insets + "]");
+                return insets.consumeSystemWindowInsets();
+            }
+        });*/
+        mainController.view.requestApplyInsets();
     }
 }

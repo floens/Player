@@ -8,6 +8,8 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
@@ -39,6 +41,8 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
     private boolean hidden = false;
     private ValueAnimator alphaAnimator;
     private float drawnAlpha = 1f;
+
+    private View back;
 
     private Callback callback;
 
@@ -120,6 +124,11 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
     public void setAlpha(float alpha) {
         super.setAlpha(alpha);
         setVisibility(alpha == 0f ? GONE : VISIBLE);
+
+        if (back != null) {
+            back.setAlpha(alpha);
+            back.setVisibility(alpha == 0f ? GONE : VISIBLE);
+        }
     }
 
     @Override
@@ -133,6 +142,18 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
         nextButton.setCallback(this);
         playPauseButton = (ReactiveButton) findViewById(R.id.button_play_pause);
         playPauseButton.setCallback(this);
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        back = ((ViewGroup) getParent()).findViewById(R.id.back);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        back = null;
     }
 
     @Override
