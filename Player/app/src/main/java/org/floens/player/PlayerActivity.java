@@ -7,6 +7,7 @@ import android.view.WindowManager;
 
 import org.floens.controller.NavigationController;
 import org.floens.controller.StartActivity;
+import org.floens.player.controller.FilesController;
 import org.floens.player.controller.MainNavigationController;
 import org.floens.player.controller.PagedNavigationController;
 import org.floens.player.controller.PlaylistController;
@@ -33,8 +34,8 @@ public class PlayerActivity extends StartActivity {
         PagedNavigationController pagedNavigationController = new PagedNavigationController(this);
         mainController.pushController(pagedNavigationController, false);
 
-        for (int i = 0; i < 3; i++) {
-            pagedNavigationController.addController(new PlaylistController(this));
-        }
+        pagedNavigationController.addController(new FilesController(this));
+        pagedNavigationController.addController(new PlaylistController(this));
+        pagedNavigationController.addController(new PlaylistController(this));
     }
 }
