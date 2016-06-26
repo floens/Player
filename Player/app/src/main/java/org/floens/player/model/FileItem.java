@@ -1,5 +1,7 @@
 package org.floens.player.model;
 
+import org.floens.player.core.StorageHelper;
+
 import java.io.File;
 
 public class FileItem {
@@ -9,11 +11,19 @@ public class FileItem {
         this.file = file;
     }
 
+    public boolean isFile() {
+        return file.isFile();
+    }
+
+    public boolean isFolder() {
+        return file.isDirectory();
+    }
+
     public boolean canNavigate() {
-        return file.exists() && file.isDirectory();
+        return StorageHelper.canNavigate(file);
     }
 
     public boolean canOpen() {
-        return file.exists() && file.isFile();
+        return StorageHelper.canOpen(file);
     }
 }

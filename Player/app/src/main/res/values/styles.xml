@@ -30,10 +30,10 @@
         <item name="text_color_secondary">#89000000</item>
         <item name="text_color_hint">#42000000</item>
 
-        <item name="dropdown_light_color">#ffffffff</item>
-        <item name="dropdown_light_pressed_color">#88ffffff</item>
-        <item name="dropdown_dark_color">#ff757575</item>
-        <item name="dropdown_dark_pressed_color">#887d7d7d</item>
+        <item name="dropdown_light_color">#ff757575</item>
+        <item name="dropdown_light_pressed_color">#887d7d7d</item>
+        <item name="dropdown_dark_color">#ffffffff</item>
+        <item name="dropdown_dark_pressed_color">#88ffffff</item>
 
         <item name="file_title_text_size">16sp</item>
         <item name="file_title_text_color">#DE000000</item>

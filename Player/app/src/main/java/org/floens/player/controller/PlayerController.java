@@ -117,6 +117,7 @@ public class PlayerController extends Controller implements View.OnClickListener
     @Override
     public boolean onBack() {
         navigationController.popController(new FadeOutTransition());
+        setPlaying(false);
         return true;
     }
 

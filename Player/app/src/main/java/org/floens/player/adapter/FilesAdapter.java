@@ -1,5 +1,8 @@
 package org.floens.player.adapter;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,27 +12,29 @@ import android.widget.TextView;
 
 import org.floens.player.R;
 import org.floens.player.model.FileItem;
+import org.floens.player.model.FileItems;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import static org.floens.controller.AndroidUtils.getAttrColor;
 
-public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.FileViewHolder> {
-    private List<FileItem> items = new ArrayList<>();
+public class FilesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private static final int ITEM_TYPE_FOLDER = 0;
+    private static final int ITEM_TYPE_FILE = 1;
+
+    private FileItem highlightedItem;
+    private FileItems fileItems;
     private Callback callback;
 
     public FilesAdapter(Callback callback) {
         this.callback = callback;
     }
 
-    public void setFiles(List<File> files) {
-        items.clear();
-        for (int i = 0; i < files.size(); i++) {
-            File file = files.get(i);
-            FileItem fileItem = new FileItem(file);
-            items.add(fileItem);
-        }
+    public void setFiles(FileItems fileItems) {
+        this.fileItems = fileItems;
         notifyDataSetChanged();
+    }
+
+    public void setHighlightedItem(FileItem highlightedItem) {
+        this.highlightedItem = highlightedItem;
     }
 
     @Override
@@ -38,19 +43,62 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.FileViewHold
                 .inflate(R.layout.cell_file, parent, false));
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public void onBindViewHolder(FileViewHolder holder, int position) {
-        FileItem item = getItem(position);
-        holder.text.setText(item.file.getName());
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        int itemViewType = getItemViewType(position);
+        switch (itemViewType) {
+            case ITEM_TYPE_FILE:
+            case ITEM_TYPE_FOLDER: {
+                boolean isFile = itemViewType == ITEM_TYPE_FILE;
+
+                FileItem item = getItem(position);
+                FileViewHolder fileViewHolder = ((FileViewHolder) holder);
+                fileViewHolder.text.setText(item.file.getName());
+
+                Context context = holder.itemView.getContext();
+
+                if (isFile) {
+                    fileViewHolder.image.setVisibility(View.GONE);
+                } else {
+                    fileViewHolder.image.setVisibility(View.VISIBLE);
+                    Drawable drawable = DrawableCompat.wrap(
+                            context.getResources().getDrawable(R.drawable.ic_folder_black_24dp, context.getTheme()));
+                    DrawableCompat.setTint(drawable, getAttrColor(context, R.attr.text_color_secondary));
+                    fileViewHolder.image.setImageDrawable(drawable);
+                }
+
+                boolean highlighted = highlightedItem != null && highlightedItem.file.equals(item.file);
+                if (highlighted) {
+                    fileViewHolder.itemView.setBackgroundColor(0x0e000000);
+                } else {
+                    fileViewHolder.itemView.setBackgroundResource(R.drawable.item_background);
+                }
+
+                break;
+            }
+        }
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return fileItems.fileItems.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        FileItem item = getItem(position);
+        if (item.isFile()) {
+            return ITEM_TYPE_FILE;
+        } else if (item.isFolder()) {
+            return ITEM_TYPE_FOLDER;
+        } else {
+            return ITEM_TYPE_FILE;
+        }
     }
 
     public FileItem getItem(int position) {
-        return items.get(position);
+        return fileItems.fileItems.get(position);
     }
 
     private void onItemClicked(FileItem fileItem) {

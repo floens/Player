@@ -1,9 +1,11 @@
 package org.floens.player.controller;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Environment;
-import android.support.v7.widget.LinearLayoutManager;
 
+import org.floens.controller.AndroidUtils;
 import org.floens.controller.Controller;
 import org.floens.player.InsetsHelper;
 import org.floens.player.R;
@@ -11,16 +13,15 @@ import org.floens.player.adapter.FilesAdapter;
 import org.floens.player.core.FileWatcher;
 import org.floens.player.layout.FilesLayout;
 import org.floens.player.model.FileItem;
+import org.floens.player.model.FileItems;
 
-import java.io.File;
-import java.util.List;
+public class FilesController extends Controller implements FileWatcher.FileWatcherCallback, FilesAdapter.Callback, FilesLayout.Callback {
+    private static final String TAG = "FilesController";
 
-public class FilesController extends Controller implements FileWatcher.FileWatcherCallback, FilesAdapter.Callback {
     private FilesLayout filesLayout;
 
-    private FilesAdapter filesAdapter;
-
     private FileWatcher fileWatcher;
+    private FileItems fileItems;
 
     public FilesController(Context context) {
         super(context);
@@ -35,23 +36,49 @@ public class FilesController extends Controller implements FileWatcher.FileWatch
 
         filesLayout = (FilesLayout) inflateRes(R.layout.layout_files);
         view = filesLayout;
-        InsetsHelper.attachInsetsPadding(filesLayout.getRecyclerView(), false, true, false, true);
+        filesLayout.setCallback(this);
 
-        filesLayout.getRecyclerView().setLayoutManager(new LinearLayoutManager(context));
-
-        filesAdapter = new FilesAdapter(this);
-        filesLayout.getRecyclerView().setAdapter(filesAdapter);
+        InsetsHelper.attachInsetsMargin(filesLayout.getBackLayout(), false, true, false, false);
+        InsetsHelper.attachInsetsMargin(filesLayout.getStorageText(), false, true, false, false);
 
         fileWatcher = new FileWatcher(this, Environment.getExternalStorageDirectory());
     }
 
     @Override
-    public void onFiles(List<File> files) {
-        filesAdapter.setFiles(files);
+    public boolean onBack() {
+        if (fileItems != null && fileItems.canNavigateUp) {
+            fileWatcher.navigateUp();
+            return true;
+        } else {
+            return super.onBack();
+        }
+    }
+
+    @Override
+    public void onFiles(FileItems fileItems) {
+        this.fileItems = fileItems;
+        filesLayout.setFiles(fileItems);
+    }
+
+    @Override
+    public void onBackClicked() {
+        fileWatcher.navigateUp();
     }
 
     @Override
     public void onFileItemClicked(FileItem fileItem) {
+        if (fileItem.canNavigate()) {
+            fileWatcher.navigateTo(fileItem.file);
+        } else if (fileItem.canOpen()) {
+            Uri uri = Uri.fromFile(fileItem.file);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setDataAndType(uri, "image/*");
+            AndroidUtils.openIntent(intent);
+        }
+    }
+
+    @Override
+    public void onStorageClicked(FileItem fileItem) {
         if (fileItem.canNavigate()) {
             fileWatcher.navigateTo(fileItem.file);
         }

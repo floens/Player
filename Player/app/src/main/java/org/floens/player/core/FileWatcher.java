@@ -3,13 +3,24 @@ package org.floens.player.core;
 import android.os.FileObserver;
 import android.util.Log;
 
+import org.floens.player.model.FileItem;
+import org.floens.player.model.FileItems;
+
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class FileWatcher {
     private static final String TAG = "FileWatcher";
+
+    private static final Comparator<FileItem> FILE_COMPARATOR = new Comparator<FileItem>() {
+        @Override
+        public int compare(FileItem a, FileItem b) {
+            return a.file.getName().compareToIgnoreCase(b.file.getName());
+        }
+    };
 
     private final FileWatcherCallback callback;
 
@@ -22,9 +33,16 @@ public class FileWatcher {
         navigateTo(startingPath);
     }
 
+    public void navigateUp() {
+        File parentFile = currentPath.getParentFile();
+        if (parentFile != null && StorageHelper.canNavigate(parentFile)) {
+            navigateTo(parentFile);
+        }
+    }
+
     public void navigateTo(File to) {
-        if (!to.exists() || !to.isDirectory()) {
-            throw new IllegalArgumentException("Not a directory");
+        if (!StorageHelper.canNavigate(to)) {
+            throw new IllegalArgumentException("Cannot navigate to " + to.getAbsolutePath());
         }
 
         if (fileObserver != null) {
@@ -32,14 +50,9 @@ public class FileWatcher {
             fileObserver = null;
         }
 
+        // TODO: fileobserver is broken
 //        int mask = FileObserver.CREATE | FileObserver.DELETE;
 //        fileObserver = new AFileObserver(to.getAbsolutePath(), mask);
-        String canonicalPath = null;
-        try {
-            canonicalPath = to.getCanonicalPath();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 //        fileObserver = new AFileObserver("/sdcard/");
 //        fileObserver.startWatching();
 
@@ -47,8 +60,24 @@ public class FileWatcher {
 
         File[] files = currentPath.listFiles();
 
-        List<File> fileList = Arrays.asList(files);
-        callback.onFiles(fileList);
+        List<FileItem> folderList = new ArrayList<>();
+        List<FileItem> fileList = new ArrayList<>();
+        for (File file : files) {
+            if (StorageHelper.canNavigate(file)) {
+                folderList.add(new FileItem(file));
+            } else if (file.isFile()) {
+                fileList.add(new FileItem(file));
+            }
+        }
+        Collections.sort(folderList, FILE_COMPARATOR);
+        Collections.sort(fileList, FILE_COMPARATOR);
+        List<FileItem> items = new ArrayList<>(folderList.size() + fileList.size());
+        items.addAll(folderList);
+        items.addAll(fileList);
+
+        boolean canNavigateUp = StorageHelper.canNavigate(currentPath.getParentFile());
+
+        callback.onFiles(new FileItems(currentPath, items, canNavigateUp));
     }
 
     private class AFileObserver extends FileObserver {
@@ -67,6 +96,6 @@ public class FileWatcher {
     }
 
     public interface FileWatcherCallback {
-        void onFiles(List<File> files);
+        void onFiles(FileItems fileItems);
     }
 }
