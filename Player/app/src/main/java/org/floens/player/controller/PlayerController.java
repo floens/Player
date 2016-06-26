@@ -2,7 +2,6 @@ package org.floens.player.controller;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -16,6 +15,7 @@ import org.floens.controller.transition.FadeOutTransition;
 import org.floens.controller.ui.drawable.ArrowMenuDrawable;
 import org.floens.player.InsetsHelper;
 import org.floens.player.R;
+import org.floens.player.egl.EGLView;
 import org.floens.player.layout.PlayerControllerContainer;
 import org.floens.player.layout.PlayerControls;
 
@@ -27,7 +27,7 @@ public class PlayerController extends Controller implements View.OnClickListener
     private static final long HIDE_TIME = 1200;
 
     private PlayerControllerContainer container;
-    private ImageView playerSurface;
+    private EGLView playerSurface;
     private ImageView back;
     private ViewGroup controlsContainer;
     private PlayerControls playerControls;
@@ -60,8 +60,8 @@ public class PlayerController extends Controller implements View.OnClickListener
         controlsContainer = (ViewGroup) view.findViewById(R.id.controls_container);
         InsetsHelper.attachInsetsMargin(controlsContainer, true, true, true, true);
 
-        playerSurface = (ImageView) view.findViewById(R.id.player_surface);
-        playerSurface.setImageURI(Uri.parse("file:///sdcard/Pictures/pic.jpg"));
+        playerSurface = (EGLView) view.findViewById(R.id.player_surface);
+//        playerSurface.setImageURI(Uri.parse("file:///sdcard/Pictures/pic.jpg"));
 
         back = (ImageView) view.findViewById(R.id.back);
         ArrowMenuDrawable drawable = new ArrowMenuDrawable();
