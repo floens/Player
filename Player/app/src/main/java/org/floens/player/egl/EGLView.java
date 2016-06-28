@@ -1,6 +1,7 @@
 package org.floens.player.egl;
 
 import android.content.Context;
+import android.graphics.PixelFormat;
 import android.opengl.GLES20;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -34,6 +35,8 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
     private EGLConfig config;
     private EGLContext context;
     private EGLSurface windowSurface;
+    private int surfaceWidth = 0;
+    private int surfaceHeight = 0;
 
     public EGLView(Context context) {
         this(context, null);
@@ -47,6 +50,7 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
         super(context, attrs, defStyle);
 
         SurfaceHolder holder = getHolder();
+        holder.setFormat(PixelFormat.RGB_888);
         holder.addCallback(this);
 
         eglHelper = new EGLHelper();
@@ -79,19 +83,27 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.d(TAG, "surfaceChanged() called with: " + "holder = [" + holder + "], format = [" + format + "], width = [" + width + "], height = [" + height + "]");
 
-        glViewport(0, 0, width, height);
-        glClearColor(0f, 1f, 1f, 1f);
-        glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        surfaceWidth = width;
+        surfaceHeight = height;
 
-        if (!egl.eglSwapBuffers(display, windowSurface)) {
-            Log.e(TAG, EGLHelper.formatEglError("eglSwapBuffers", egl.eglGetError()));
-        }
+        getHolder().setFixedSize(surfaceWidth, surfaceHeight);
+        drawAndSwap();
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.d(TAG, "surfaceDestroyed() called with: " + "holder = [" + holder + "]");
         goToState(STATE_CREATED);
+    }
+
+    private void drawAndSwap() {
+        glViewport(0, 0, surfaceWidth, surfaceHeight);
+        glClearColor(1f, 0f, 0f, 1f);
+        glClear(GLES20.GL_COLOR_BUFFER_BIT);
+
+        if (!egl.eglSwapBuffers(display, windowSurface)) {
+            Log.e(TAG, EGLHelper.formatEglError("eglSwapBuffers", egl.eglGetError()));
+        }
     }
 
     private void goToState(int newState) {

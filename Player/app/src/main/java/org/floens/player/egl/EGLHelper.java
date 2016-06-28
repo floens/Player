@@ -34,7 +34,7 @@ public class EGLHelper {
         int redSize = 8;
         int greenSize = 8;
         int blueSize = 8;
-        int alphaSize = 8;
+        int alphaSize = 0;
         int depthSize = 0;
         int stencilSize = 0;
 
