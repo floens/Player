@@ -15,6 +15,7 @@ import org.floens.controller.transition.FadeOutTransition;
 import org.floens.controller.ui.drawable.ArrowMenuDrawable;
 import org.floens.player.InsetsHelper;
 import org.floens.player.R;
+import org.floens.player.egl.DummyRenderer;
 import org.floens.player.egl.EGLView;
 import org.floens.player.layout.PlayerControllerContainer;
 import org.floens.player.layout.PlayerControls;
@@ -34,6 +35,8 @@ public class PlayerController extends Controller implements View.OnClickListener
 
     private boolean playing = false;
     private boolean touchDown = false;
+
+    private DummyRenderer dummyRenderer;
 
     private Handler handler;
     private GestureDetector gestureDetector;
@@ -62,6 +65,9 @@ public class PlayerController extends Controller implements View.OnClickListener
 
         playerSurface = (EGLView) view.findViewById(R.id.player_surface);
 //        playerSurface.setImageURI(Uri.parse("file:///sdcard/Pictures/pic.jpg"));
+
+        dummyRenderer = new DummyRenderer();
+        playerSurface.setRenderer(dummyRenderer);
 
         back = (ImageView) view.findViewById(R.id.back);
         ArrowMenuDrawable drawable = new ArrowMenuDrawable();

@@ -2,7 +2,6 @@ package org.floens.player.egl;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.opengl.GLES20;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -13,12 +12,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
-import javax.microedition.khronos.opengles.GL;
 import javax.microedition.khronos.opengles.GL10;
-
-import static android.opengl.GLES20.glClear;
-import static android.opengl.GLES20.glClearColor;
-import static android.opengl.GLES20.glViewport;
 
 public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "EGLView";
@@ -30,10 +24,12 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
     private EGLHelper eglHelper;
     private int state = STATE_DESTROYED;
 
+    private EGLRenderer renderer;
+
     private EGL10 egl;
     private EGLDisplay display;
     private EGLConfig config;
-    private EGLContext context;
+    private EGLContext eglContext;
     private EGLSurface windowSurface;
     private int surfaceWidth = 0;
     private int surfaceHeight = 0;
@@ -60,6 +56,10 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
+    public void setRenderer(EGLRenderer renderer) {
+        this.renderer = renderer;
+    }
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -75,8 +75,6 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.d(TAG, "surfaceCreated() called with: " + "holder = [" + holder + "]");
-
-        goToState(STATE_BOUND);
     }
 
     @Override
@@ -87,7 +85,8 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
         surfaceHeight = height;
 
         getHolder().setFixedSize(surfaceWidth, surfaceHeight);
-        drawAndSwap();
+
+        goToState(STATE_BOUND);
     }
 
     @Override
@@ -96,34 +95,28 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
         goToState(STATE_CREATED);
     }
 
-    private void drawAndSwap() {
-        glViewport(0, 0, surfaceWidth, surfaceHeight);
-        glClearColor(1f, 0f, 0f, 1f);
-        glClear(GLES20.GL_COLOR_BUFFER_BIT);
-
-        if (!egl.eglSwapBuffers(display, windowSurface)) {
-            Log.e(TAG, EGLHelper.formatEglError("eglSwapBuffers", egl.eglGetError()));
-        }
-    }
-
     private void goToState(int newState) {
         if (state != newState) {
             Log.i(TAG, "go to state " + newState);
             if (newState > state) {
                 if (newState >= STATE_CREATED && state < STATE_CREATED) {
                     create();
+                    renderer.create(eglContext, egl, display);
                     state = STATE_CREATED;
                 }
                 if (newState >= STATE_BOUND && state < STATE_BOUND) {
                     bind();
+                    renderer.bind(windowSurface);
                     state = STATE_BOUND;
                 }
             } else {
                 if (newState <= STATE_CREATED && state > STATE_CREATED) {
+                    renderer.unbind();
                     unbind();
                     state = STATE_CREATED;
                 }
                 if (newState <= STATE_DESTROYED && state > STATE_DESTROYED) {
+                    renderer.destroy();
                     destroy();
                     state = STATE_DESTROYED;
                 }
@@ -135,13 +128,13 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
         Log.d(TAG, "create()");
         display = eglHelper.initialize(egl);
         config = eglHelper.chooseConfig(egl, display);
-        context = eglHelper.createContext(egl, display, config);
+        eglContext = eglHelper.createContext(egl, display, config);
     }
 
     private void destroy() {
         Log.d(TAG, "destroy()");
-        eglHelper.destroyContext(egl, display, context);
-        context = null;
+        eglHelper.destroyContext(egl, display, eglContext);
+        eglContext = null;
         eglHelper.terminate(egl, display);
         display = null;
         egl = null;
@@ -153,22 +146,7 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
 
         windowSurface = eglHelper.createWindowSurface(egl, display, config, getHolder());
 
-        if (!egl.eglMakeCurrent(display, windowSurface, windowSurface, context)) {
-            Log.e(TAG, "eglMakeCurrent failed");
-        }
-
-        GL gl = context.getGL();
-        Log.i(TAG, "gl: " + gl);
-
-        for (Class<?> aClass : gl.getClass().getInterfaces()) {
-            Log.i(TAG, "surfaceCreated: " + aClass);
-        }
-
-        if (gl instanceof GLES20) {
-            Log.i(TAG, "GLES20");
-        }
-
-        GL10 gl10 = (GL10) gl;
+        GL10 gl10 = (GL10) eglContext.getGL();
         String glVersion = gl10.glGetString(GL10.GL_VERSION);
         Log.i(TAG, "glVersion: " + glVersion);
     }
@@ -176,7 +154,6 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
     private void unbind() {
         Log.d(TAG, "unbind()");
 
-        egl.eglMakeCurrent(display, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
         eglHelper.destroySurface(egl, display, windowSurface);
 
         windowSurface = null;
