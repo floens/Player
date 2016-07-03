@@ -1,0 +1,25 @@
+59c59,60
+< 	$(MAKE) $(AM_MAKEFLAGS) $(gen_bidi_type_tab)
+---
+> # CC= hack to avoid building with the host tools
+> 	$(MAKE) CC=/usr/bin/gcc $(AM_MAKEFLAGS) $(gen_bidi_type_tab)
+74c75,76
+< 	$(MAKE) $(AM_MAKEFLAGS) $(gen_joining_type_tab)
+---
+> # CC= hack to avoid building with the host tools
+> 	$(MAKE) CC=/usr/bin/gcc $(AM_MAKEFLAGS) $(gen_joining_type_tab)
+86c88,89
+< 	$(MAKE) $(AM_MAKEFLAGS) $(gen_arabic_shaping_tab)
+---
+> # CC= hack to avoid building with the host tools
+> 	$(MAKE) CC=/usr/bin/gcc $(AM_MAKEFLAGS) $(gen_arabic_shaping_tab)
+98c101,102
+< 	$(MAKE) $(AM_MAKEFLAGS) $(gen_mirroring_tab)
+---
+> # CC= hack to avoid building with the host tools
+> 	$(MAKE) CC=/usr/bin/gcc $(AM_MAKEFLAGS) $(gen_mirroring_tab)
+110c114,115
+< 	$(MAKE) $(AM_MAKEFLAGS) $(gen_unicode_version)
+---
+> # CC= hack to avoid building with the host tools
+> 	$(MAKE) CC=/usr/bin/gcc $(AM_MAKEFLAGS) $(gen_unicode_version)

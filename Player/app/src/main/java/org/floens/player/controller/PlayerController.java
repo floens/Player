@@ -14,11 +14,13 @@ import org.floens.controller.Controller;
 import org.floens.controller.transition.FadeOutTransition;
 import org.floens.controller.ui.drawable.ArrowMenuDrawable;
 import org.floens.player.InsetsHelper;
+import org.floens.player.PlayerApplication;
 import org.floens.player.R;
-import org.floens.player.egl.DummyRenderer;
 import org.floens.player.egl.EGLView;
 import org.floens.player.layout.PlayerControllerContainer;
 import org.floens.player.layout.PlayerControls;
+import org.floens.player.mpv.MpvCore;
+import org.floens.player.mpv.MpvRenderer;
 
 import static org.floens.controller.AndroidUtils.setRoundItemBackground;
 
@@ -36,7 +38,8 @@ public class PlayerController extends Controller implements View.OnClickListener
     private boolean playing = false;
     private boolean touchDown = false;
 
-    private DummyRenderer dummyRenderer;
+//    private DummyRenderer dummyRenderer;
+    private MpvRenderer mpvRenderer;
 
     private Handler handler;
     private GestureDetector gestureDetector;
@@ -64,10 +67,10 @@ public class PlayerController extends Controller implements View.OnClickListener
         InsetsHelper.attachInsetsMargin(controlsContainer, true, true, true, true);
 
         playerSurface = (EGLView) view.findViewById(R.id.player_surface);
-//        playerSurface.setImageURI(Uri.parse("file:///sdcard/Pictures/pic.jpg"));
 
-        dummyRenderer = new DummyRenderer();
-        playerSurface.setRenderer(dummyRenderer);
+        MpvCore mpvCore = PlayerApplication.getInstance().getMpvCore();
+        mpvRenderer = new MpvRenderer(mpvCore);
+        playerSurface.setRenderer(mpvRenderer);
 
         back = (ImageView) view.findViewById(R.id.back);
         ArrowMenuDrawable drawable = new ArrowMenuDrawable();
