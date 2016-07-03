@@ -4,20 +4,29 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
+
+import org.floens.controller.permissions.RuntimePermissionsHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class StartActivity extends Activity {
+public abstract class StartActivity extends AppCompatActivity {
     protected Controller mainController;
 
     private ViewGroup contentView;
     private List<Controller> stack = new ArrayList<>();
 
+    private RuntimePermissionsHelper runtimePermissionsHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        runtimePermissionsHelper = new RuntimePermissionsHelper(this);
 
         contentView = (ViewGroup) findViewById(android.R.id.content);
 
@@ -30,6 +39,10 @@ public abstract class StartActivity extends Activity {
         // Prevent overdraw
         // Do this after setContentView, or the decor creating will reset the background to a default non-null drawable
         getWindow().setBackgroundDrawable(null);
+    }
+
+    public RuntimePermissionsHelper getRuntimePermissionsHelper() {
+        return runtimePermissionsHelper;
     }
 
     public void addController(Controller controller) {
@@ -91,6 +104,13 @@ public abstract class StartActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        runtimePermissionsHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private Controller stackTop() {

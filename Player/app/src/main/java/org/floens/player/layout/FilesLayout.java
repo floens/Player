@@ -71,7 +71,9 @@ public class FilesLayout extends LinearLayout implements FilesAdapter.Callback, 
         storageText = (TextView) findViewById(R.id.storage_text);
 
         backLayout.setOnClickListener(this);
+    }
 
+    public void initialize() {
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 

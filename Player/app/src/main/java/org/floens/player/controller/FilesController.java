@@ -1,12 +1,19 @@
 package org.floens.player.controller;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 
 import org.floens.controller.AndroidUtils;
 import org.floens.controller.Controller;
+import org.floens.controller.StartActivity;
+import org.floens.controller.permissions.RuntimePermissionsHelper;
 import org.floens.player.InsetsHelper;
 import org.floens.player.R;
 import org.floens.player.adapter.FilesAdapter;
@@ -19,6 +26,9 @@ public class FilesController extends Controller implements FileWatcher.FileWatch
     private static final String TAG = "FilesController";
 
     private FilesLayout filesLayout;
+
+    private RuntimePermissionsHelper runtimePermissionsHelper;
+    private boolean gotPermission = false;
 
     private FileWatcher fileWatcher;
     private FileItems fileItems;
@@ -42,6 +52,14 @@ public class FilesController extends Controller implements FileWatcher.FileWatch
         InsetsHelper.attachInsetsMargin(filesLayout.getStorageText(), false, true, false, false);
 
         fileWatcher = new FileWatcher(this, Environment.getExternalStorageDirectory());
+
+        runtimePermissionsHelper = ((StartActivity) context).getRuntimePermissionsHelper();
+        gotPermission = hasPermission();
+        if (gotPermission) {
+            initialize();
+        } else {
+            requestPermission();
+        }
     }
 
     @Override
@@ -82,5 +100,47 @@ public class FilesController extends Controller implements FileWatcher.FileWatch
         if (fileItem.canNavigate()) {
             fileWatcher.navigateTo(fileItem.file);
         }
+    }
+
+    private boolean hasPermission() {
+        return runtimePermissionsHelper.hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    }
+
+    private void requestPermission() {
+        runtimePermissionsHelper.requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, new RuntimePermissionsHelper.Callback() {
+            @Override
+            public void onRuntimePermissionResult(boolean granted) {
+                gotPermission = granted;
+                if (gotPermission) {
+                    initialize();
+                } else {
+                    new AlertDialog.Builder(context)
+                            .setTitle(R.string.write_permission_required_title)
+                            .setMessage(R.string.write_permission_required)
+                            .setCancelable(false)
+                            .setNeutralButton(R.string.write_permission_app_settings, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    requestPermission();
+                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                            Uri.parse("package:" + context.getPackageName()));
+                                    AndroidUtils.openIntent(intent);
+                                }
+                            })
+                            .setPositiveButton(R.string.write_permission_grant, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    requestPermission();
+                                }
+                            })
+                            .show();
+                }
+            }
+        });
+    }
+
+    private void initialize() {
+        filesLayout.initialize();
+        fileWatcher.initialize();
     }
 }

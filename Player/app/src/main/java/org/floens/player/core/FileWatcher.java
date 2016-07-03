@@ -23,6 +23,8 @@ public class FileWatcher {
     };
 
     private final FileWatcherCallback callback;
+    boolean initialized = false;
+    private File startingPath;
 
     private File currentPath;
 
@@ -30,6 +32,11 @@ public class FileWatcher {
 
     public FileWatcher(FileWatcherCallback callback, File startingPath) {
         this.callback = callback;
+        this.startingPath = startingPath;
+    }
+
+    public void initialize() {
+        initialized = true;
         navigateTo(startingPath);
     }
 
