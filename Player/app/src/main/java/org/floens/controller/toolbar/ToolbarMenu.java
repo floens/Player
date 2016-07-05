@@ -28,7 +28,7 @@ import org.floens.player.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.floens.controller.AndroidUtils.dp;
+import static org.floens.controller.utils.AndroidUtils.dp;
 
 public class ToolbarMenu extends LinearLayout {
     private List<ToolbarMenuItem> items = new ArrayList<>();

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<org.floens.player.layout.FilesLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<org.floens.player.ui.layout.FilesLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/backcolor"
@@ -64,4 +64,4 @@
         android:clipToPadding="false"
         android:paddingBottom="@dimen/content_padding_bottom" />
 
-</org.floens.player.layout.FilesLayout>
+</org.floens.player.ui.layout.FilesLayout>

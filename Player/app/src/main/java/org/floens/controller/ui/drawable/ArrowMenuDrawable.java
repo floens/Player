@@ -26,7 +26,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 
-import static org.floens.controller.AndroidUtils.dp;
+import static org.floens.controller.utils.AndroidUtils.dp;
 
 public class ArrowMenuDrawable extends Drawable {
     private final Paint mPaint = new Paint();

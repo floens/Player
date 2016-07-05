@@ -3,8 +3,8 @@ package org.floens.player.core;
 import android.os.FileObserver;
 import android.util.Log;
 
-import org.floens.player.model.FileItem;
-import org.floens.player.model.FileItems;
+import org.floens.player.core.model.FileItem;
+import org.floens.player.core.model.FileItems;
 
 import java.io.File;
 import java.util.ArrayList;

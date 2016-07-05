@@ -23,8 +23,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import static org.floens.controller.AndroidUtils.dp;
-import static org.floens.controller.AndroidUtils.setRoundItemBackground;
+import static org.floens.controller.utils.AndroidUtils.dp;
+import static org.floens.controller.utils.AndroidUtils.setRoundItemBackground;
 
 public class ToolbarMenuItem implements View.OnClickListener, FloatingMenu.FloatingMenuCallback {
     private ToolbarMenuItemCallback callback;

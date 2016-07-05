@@ -3,8 +3,8 @@ package org.floens.player;
 import android.app.Application;
 import android.os.StrictMode;
 
-import org.floens.controller.AndroidUtils;
-import org.floens.player.mpv.MpvCore;
+import org.floens.controller.utils.AndroidUtils;
+import org.floens.mpv.MpvCore;
 
 public class PlayerApplication extends Application {
     private static PlayerApplication instance;

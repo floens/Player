@@ -22,7 +22,7 @@ import android.view.View;
 
 import java.util.List;
 
-import static org.floens.controller.AndroidUtils.getString;
+import static org.floens.controller.utils.AndroidUtils.getString;
 
 public class NavigationItem {
     public String title = "";

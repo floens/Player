@@ -5,7 +5,7 @@ import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.util.Log;
 
-import org.floens.controller.AndroidUtils;
+import org.floens.controller.utils.AndroidUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;

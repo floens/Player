@@ -35,8 +35,8 @@ import org.floens.player.R;
 
 import java.util.List;
 
-import static org.floens.controller.AndroidUtils.dp;
-import static org.floens.controller.AndroidUtils.getAttrColor;
+import static org.floens.controller.utils.AndroidUtils.dp;
+import static org.floens.controller.utils.AndroidUtils.getAttrColor;
 
 public class FloatingMenu {
     public static final int POPUP_WIDTH_AUTO = -1;

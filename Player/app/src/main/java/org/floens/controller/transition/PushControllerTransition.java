@@ -24,7 +24,7 @@ import android.animation.ObjectAnimator;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
-import org.floens.controller.AndroidUtils;
+import org.floens.controller.utils.AndroidUtils;
 import org.floens.controller.ControllerTransition;
 
 public class PushControllerTransition extends ControllerTransition {

@@ -7,10 +7,10 @@ import android.view.WindowManager;
 
 import org.floens.controller.NavigationController;
 import org.floens.controller.StartActivity;
-import org.floens.player.controller.FilesController;
-import org.floens.player.controller.MainNavigationController;
-import org.floens.player.controller.PagedNavigationController;
-import org.floens.player.controller.PlaylistController;
+import org.floens.player.ui.controller.FilesController;
+import org.floens.player.ui.controller.MainNavigationController;
+import org.floens.player.ui.controller.PagedNavigationController;
+import org.floens.player.ui.controller.PlaylistController;
 
 public class PlayerActivity extends StartActivity {
     private static final String TAG = "PlayerActivity";

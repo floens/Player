@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
-import static org.floens.controller.AndroidUtils.getAppContext;
+import static org.floens.controller.utils.AndroidUtils.getAppContext;
 
 public class RuntimePermissionsHelper {
     private static final int RUNTIME_PERMISSION_RESULT_ID = 100;

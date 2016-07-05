@@ -25,10 +25,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.floens.controller.utils.AndroidUtils;
 import org.floens.controller.toolbar.NavigationItem;
 import org.floens.controller.transition.FadeInTransition;
 import org.floens.controller.transition.FadeOutTransition;
-import org.floens.player.view.BottomBarItem;
+import org.floens.player.ui.view.BottomBarItem;
 
 import java.util.ArrayList;
 import java.util.List;

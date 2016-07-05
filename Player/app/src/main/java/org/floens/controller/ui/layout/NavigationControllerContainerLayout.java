@@ -34,7 +34,7 @@ import android.widget.Scroller;
 import org.floens.controller.Controller;
 import org.floens.controller.NavigationController;
 
-import static org.floens.controller.AndroidUtils.dp;
+import static org.floens.controller.utils.AndroidUtils.dp;
 
 public class NavigationControllerContainerLayout extends FrameLayout {
     // The shadow starts at this alpha and goes up to 1f

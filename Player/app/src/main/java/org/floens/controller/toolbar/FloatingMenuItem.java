@@ -17,7 +17,7 @@
  */
 package org.floens.controller.toolbar;
 
-import static org.floens.controller.AndroidUtils.getString;
+import static org.floens.controller.utils.AndroidUtils.getString;
 
 public class FloatingMenuItem {
     private Object id;

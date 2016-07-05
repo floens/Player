@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<org.floens.player.layout.PlayerBar xmlns:android="http://schemas.android.com/apk/res/android"
+<org.floens.player.ui.layout.PlayerBar xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/music_bar"
     android:layout_width="match_parent"
     android:layout_height="@dimen/music_bar_height"
@@ -38,9 +38,9 @@
 
     </LinearLayout>
 
-    <org.floens.player.view.ReactiveButton
+    <org.floens.player.ui.view.ReactiveButton
         android:id="@+id/button_play_pause"
         android:layout_width="48dp"
         android:layout_height="match_parent" />
 
-</org.floens.player.layout.PlayerBar>
+</org.floens.player.ui.layout.PlayerBar>

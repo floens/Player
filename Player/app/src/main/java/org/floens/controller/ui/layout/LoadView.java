@@ -28,7 +28,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
-import org.floens.controller.AnimationUtils;
+import org.floens.controller.utils.AnimationUtils;
 
 /**
  * Container for a view with an ProgressBar. Toggles between the view and a

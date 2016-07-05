@@ -39,20 +39,20 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.floens.controller.AndroidUtils;
-import org.floens.controller.ui.layout.LoadView;
-import org.floens.controller.ui.layout.SearchLayout;
+import org.floens.controller.utils.AndroidUtils;
 import org.floens.controller.ui.drawable.ArrowMenuDrawable;
 import org.floens.controller.ui.drawable.DropdownArrowDrawable;
+import org.floens.controller.ui.layout.LoadView;
+import org.floens.controller.ui.layout.SearchLayout;
 import org.floens.player.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.floens.controller.AndroidUtils.dp;
-import static org.floens.controller.AndroidUtils.getAttrColor;
-import static org.floens.controller.AndroidUtils.removeFromParentView;
-import static org.floens.controller.AndroidUtils.setRoundItemBackground;
+import static org.floens.controller.utils.AndroidUtils.dp;
+import static org.floens.controller.utils.AndroidUtils.getAttrColor;
+import static org.floens.controller.utils.AndroidUtils.removeFromParentView;
+import static org.floens.controller.utils.AndroidUtils.setRoundItemBackground;
 
 public class Toolbar extends LinearLayout implements View.OnClickListener {
     public static final int TOOLBAR_COLLAPSE_HIDE = 1000000;

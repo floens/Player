@@ -3,31 +3,31 @@
 #include "player.h"
 
 JNIEXPORT jint JNICALL
-Java_org_floens_player_mpv_MpvCore_nativeInitialize(
+Java_org_floens_mpv_MpvCore_nativeInitialize(
         JNIEnv *env, jobject instance) {
     return player_initialize(env);
 }
 
 JNIEXPORT int JNICALL
-Java_org_floens_player_mpv_MpvCore_nativeBind(
+Java_org_floens_mpv_MpvCore_nativeBind(
         JNIEnv *env, jobject instance) {
     return player_bind();
 }
 
 JNIEXPORT void
-JNICALL Java_org_floens_player_mpv_MpvCore_nativeResize(
+JNICALL Java_org_floens_mpv_MpvCore_nativeResize(
         JNIEnv *env, jobject instance, jint width, jint height) {
     player_resize(width, height);
 }
 
 JNIEXPORT void JNICALL
-Java_org_floens_player_mpv_MpvCore_nativeUnbind(
+Java_org_floens_mpv_MpvCore_nativeUnbind(
         JNIEnv *env, jobject instance) {
     player_unbind();
 }
 
 JNIEXPORT void
-JNICALL Java_org_floens_player_mpv_MpvCore_nativeCommand(
+JNICALL Java_org_floens_mpv_MpvCore_nativeCommand(
         JNIEnv *env, jobject instance, jobjectArray array) {
     int length = (*env)->GetArrayLength(env, array);
 

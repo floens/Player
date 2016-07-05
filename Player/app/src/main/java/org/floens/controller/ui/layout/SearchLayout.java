@@ -31,10 +31,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.floens.controller.AndroidUtils;
+import org.floens.controller.utils.AndroidUtils;
 import org.floens.player.R;
 
-import static org.floens.controller.AndroidUtils.dp;
+import static org.floens.controller.utils.AndroidUtils.dp;
 
 public class SearchLayout extends LinearLayout {
     private EditText searchView;
