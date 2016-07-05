@@ -91,7 +91,7 @@ public class DummyRenderer implements EGLRenderer {
     }
 
     @Override
-    public void bind(EGLSurface surface) {
+    public void bind(EGLSurface surface, int width, int height) {
         this.surface = surface;
 
         if (!egl.eglMakeCurrent(display, surface, surface, eglContext)) {
@@ -153,6 +153,10 @@ public class DummyRenderer implements EGLRenderer {
         }
 
         new Thread(drawLoop).start();
+    }
+
+    @Override
+    public void resize(int width, int height) {
     }
 
     @Override

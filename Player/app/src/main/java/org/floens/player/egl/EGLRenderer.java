@@ -8,7 +8,9 @@ import javax.microedition.khronos.egl.EGLSurface;
 public interface EGLRenderer {
     void create(EGLContext eglContext, EGL10 egl, EGLDisplay display);
 
-    void bind(EGLSurface surface);
+    void bind(EGLSurface surface, int width, int height);
+
+    void resize(int width, int height);
 
     void unbind();
 

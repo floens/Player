@@ -14,6 +14,7 @@ import org.floens.controller.AndroidUtils;
 import org.floens.controller.Controller;
 import org.floens.controller.StartActivity;
 import org.floens.controller.permissions.RuntimePermissionsHelper;
+import org.floens.controller.transition.FadeInTransition;
 import org.floens.player.InsetsHelper;
 import org.floens.player.R;
 import org.floens.player.adapter.FilesAdapter;
@@ -88,10 +89,14 @@ public class FilesController extends Controller implements FileWatcher.FileWatch
         if (fileItem.canNavigate()) {
             fileWatcher.navigateTo(fileItem.file);
         } else if (fileItem.canOpen()) {
-            Uri uri = Uri.fromFile(fileItem.file);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            intent.setDataAndType(uri, "image/*");
-            AndroidUtils.openIntent(intent);
+//            Uri uri = Uri.fromFile(fileItem.file);
+//            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+//            intent.setDataAndType(uri, "image/*");
+//            AndroidUtils.openIntent(intent);
+
+            PlayerController playerController = new PlayerController(context);
+            playerController.setFileItem(fileItem);
+            navigationController.pushController(playerController, new FadeInTransition());
         }
     }
 

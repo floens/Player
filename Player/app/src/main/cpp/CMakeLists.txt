@@ -48,7 +48,9 @@ include_directories(${libs_dir}/include)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
 
-add_library(player SHARED playermain.c)
+add_library(player SHARED
+    event_thread.c render_thread.c player_interface.c logger.c player.c
+)
 
 target_link_libraries(
     player

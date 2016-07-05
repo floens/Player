@@ -31,8 +31,8 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
     private EGLConfig config;
     private EGLContext eglContext;
     private EGLSurface windowSurface;
-    private int surfaceWidth = 0;
-    private int surfaceHeight = 0;
+    private int surfaceWidth;
+    private int surfaceHeight;
 
     public EGLView(Context context) {
         this(context, null);
@@ -81,12 +81,24 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.d(TAG, "surfaceChanged() called with: " + "holder = [" + holder + "], format = [" + format + "], width = [" + width + "], height = [" + height + "]");
 
-        surfaceWidth = width;
-        surfaceHeight = height;
+        boolean sendResize = false;
+        if (width != surfaceWidth || height != surfaceHeight) {
+            surfaceWidth = width;
+            surfaceHeight = height;
+            // Only send a resize() to the renderer if it was already bound
+            // Otherwise bind() gives the correct dimensions
+            if (state == STATE_BOUND) {
+                sendResize = true;
+            }
+        }
 
-        getHolder().setFixedSize(surfaceWidth, surfaceHeight);
+//        getHolder().setFixedSize(surfaceWidth, surfaceHeight);
 
         goToState(STATE_BOUND);
+
+        if (sendResize) {
+            renderer.resize(surfaceWidth, surfaceHeight);
+        }
     }
 
     @Override
@@ -106,7 +118,7 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
                 }
                 if (newState >= STATE_BOUND && state < STATE_BOUND) {
                     bind();
-                    renderer.bind(windowSurface);
+                    renderer.bind(windowSurface, surfaceWidth, surfaceHeight);
                     state = STATE_BOUND;
                 }
             } else {
@@ -145,6 +157,9 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
         Log.d(TAG, "bind()");
 
         windowSurface = eglHelper.createWindowSurface(egl, display, config, getHolder());
+        if (!egl.eglMakeCurrent(display, windowSurface, windowSurface, eglContext)) {
+            Log.e(TAG, "eglMakeCurrent failed");
+        }
 
         GL10 gl10 = (GL10) eglContext.getGL();
         String glVersion = gl10.glGetString(GL10.GL_VERSION);

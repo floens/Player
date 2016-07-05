@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import org.floens.controller.AndroidUtils;
 import org.floens.controller.Controller;
 import org.floens.controller.transition.FadeOutTransition;
 import org.floens.controller.ui.drawable.ArrowMenuDrawable;
@@ -19,6 +20,7 @@ import org.floens.player.R;
 import org.floens.player.egl.EGLView;
 import org.floens.player.layout.PlayerControllerContainer;
 import org.floens.player.layout.PlayerControls;
+import org.floens.player.model.FileItem;
 import org.floens.player.mpv.MpvCore;
 import org.floens.player.mpv.MpvRenderer;
 
@@ -35,12 +37,6 @@ public class PlayerController extends Controller implements View.OnClickListener
     private ViewGroup controlsContainer;
     private PlayerControls playerControls;
 
-    private boolean playing = false;
-    private boolean touchDown = false;
-
-//    private DummyRenderer dummyRenderer;
-    private MpvRenderer mpvRenderer;
-
     private Handler handler;
     private GestureDetector gestureDetector;
 
@@ -51,8 +47,19 @@ public class PlayerController extends Controller implements View.OnClickListener
         }
     };
 
+    private FileItem fileItem;
+    private boolean playing = false;
+    private boolean touchDown = false;
+
+    private MpvCore mpvCore;
+    private MpvRenderer mpvRenderer;
+
     public PlayerController(Context context) {
         super(context);
+    }
+
+    public void setFileItem(FileItem fileItem) {
+        this.fileItem = fileItem;
     }
 
     @Override
@@ -67,10 +74,6 @@ public class PlayerController extends Controller implements View.OnClickListener
         InsetsHelper.attachInsetsMargin(controlsContainer, true, true, true, true);
 
         playerSurface = (EGLView) view.findViewById(R.id.player_surface);
-
-        MpvCore mpvCore = PlayerApplication.getInstance().getMpvCore();
-        mpvRenderer = new MpvRenderer(mpvCore);
-        playerSurface.setRenderer(mpvRenderer);
 
         back = (ImageView) view.findViewById(R.id.back);
         ArrowMenuDrawable drawable = new ArrowMenuDrawable();
@@ -92,12 +95,30 @@ public class PlayerController extends Controller implements View.OnClickListener
         });
 
         handler = new Handler();
+
+        initialize();
+    }
+
+    private void initialize() {
+        mpvCore = PlayerApplication.getInstance().getMpvCore();
+        mpvRenderer = new MpvRenderer(mpvCore);
+        playerSurface.setRenderer(mpvRenderer);
     }
 
     @Override
     public void onShow() {
         super.onShow();
         view.requestApplyInsets();
+
+
+        AndroidUtils.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mpvCore.command(new String[]{
+                        "loadfile", fileItem.file.getAbsolutePath()
+                });
+            }
+        }, 500);
     }
 
     @Override

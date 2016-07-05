@@ -350,8 +350,9 @@ configure_deps() {
     log_info "Configuring dependencies for arch $arch"
 
     local toolchain_dir=$(readlink -f toolchain/$arch)
-    local prefix_dir=$(readlink -f prefix/$arch)
+    local prefix_dir=prefix/$arch
     mkdir -p $prefix_dir
+    local prefix_dir=$(readlink -f $prefix_dir)
 
     PATH="$toolchain_dir/bin:$ORIGINAL_PATH"
 
