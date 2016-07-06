@@ -80,6 +80,9 @@ public class ReactiveButton extends View implements View.OnClickListener {
         animators.add(scaleAnimator);
 
         if (drawables.size() > 1) {
+            selected = (selected + 1) % drawables.size();
+            onSelectedChanged(selected);
+
             ValueAnimator alphaAnimator = ObjectAnimator.ofFloat(1f, 0f, 1f);
             alphaAnimator.setDuration(duration);
             alphaAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -90,9 +93,7 @@ public class ReactiveButton extends View implements View.OnClickListener {
                     drawableAlpha = (float) animation.getAnimatedValue();
                     if (animation.getAnimatedFraction() >= 0.5f && !switched) {
                         switched = true;
-                        selected = (selected + 1) % drawables.size();
                         drawable = drawables.get(selected);
-                        onSelectedChanged(selected);
                     }
                     invalidate();
                 }

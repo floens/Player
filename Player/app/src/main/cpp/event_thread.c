@@ -2,21 +2,24 @@
 #include <pthread.h>
 
 #include <android/looper.h>
+#include <jni.h>
 
 #include "logger.h"
 
+#include "player_interface.h"
 #include "event_thread.h"
+#include "player.h"
 
 static void *event_thread_run(void *event_thread);
 
-struct event_thread *event_thread_create(mpv_handle *mpv) {
+struct event_thread *event_thread_create(struct player_context *player_context) {
     struct event_thread *event_thread = malloc(sizeof(struct event_thread));
     pthread_mutex_init(&event_thread->lock, NULL);
     pthread_cond_init(&event_thread->ready, NULL);
 
     event_thread->running = 0;
 
-    event_thread->mpv = mpv;
+    event_thread->player_context = player_context;
 
     return event_thread;
 }
@@ -46,9 +49,14 @@ void event_thread_destroy(struct event_thread *event_thread) {
 static void *event_thread_run(void *data) {
     struct event_thread *event_thread = data;
 
-    mpv_handle *mpv;
+    JNIEnv *env = event_thread->player_context->env;
+    JavaVM *vm = event_thread->player_context->vm;
+    mpv_handle *mpv = event_thread->player_context->mpv;
+    jobject core_instance = event_thread->player_context->core_instance;
+
+    (*vm)->AttachCurrentThread(vm, &env, NULL);
+
     pthread_mutex_lock(&event_thread->lock);
-    mpv = event_thread->mpv;
     event_thread->running = 1;
     pthread_cond_broadcast(&event_thread->ready);
     pthread_mutex_unlock(&event_thread->lock);
@@ -64,7 +72,29 @@ static void *event_thread_run(void *data) {
         }
 
         event = mpv_wait_event(mpv, -1.0);
+
+        // Ignoring all deprecated and async() events
         switch (event->event_id) {
+            case MPV_EVENT_SHUTDOWN: {
+                // TODO
+                break;
+            }
+            case MPV_EVENT_START_FILE:
+            case MPV_EVENT_FILE_LOADED:
+            case MPV_EVENT_IDLE:
+            case MPV_EVENT_VIDEO_RECONFIG:
+            case MPV_EVENT_AUDIO_RECONFIG:
+            case MPV_EVENT_SEEK:
+            case MPV_EVENT_PLAYBACK_RESTART: {
+                const char *event_name = mpv_event_name(event->event_id);
+                event_no_data(env, core_instance, event_name);
+                break;
+            }
+            case MPV_EVENT_END_FILE: {
+                mpv_event_end_file *end_file = event->data;
+                int reason = end_file->reason;
+                break;
+            }
             case MPV_EVENT_LOG_MESSAGE: {
                 mpv_event_log_message *msg = event->data;
                 LOGI("[%s:%s] %s", msg->prefix, msg->level, msg->text);
@@ -72,16 +102,49 @@ static void *event_thread_run(void *data) {
             }
             case MPV_EVENT_PROPERTY_CHANGE: {
                 mpv_event_property *property = event->data;
-                LOGI("Property %s changed", property->name);
+                uint64_t userdata = event->reply_userdata;
+
+                switch (property->format) {
+                    case MPV_FORMAT_NONE: {
+                        LOGE("Received MPV_FORMAT_NONE");
+                        break;
+                    }
+                    case MPV_FORMAT_STRING:
+                    case MPV_FORMAT_OSD_STRING: {
+                        event_property_string(env, core_instance, userdata, property->name, property->data);
+                        break;
+                    }
+                    case MPV_FORMAT_FLAG: {
+                        int flag = *(int *) property->data;
+                        event_property_flag(env, core_instance, userdata, property->name, flag);
+                        break;
+                    }
+                    case MPV_FORMAT_INT64: {
+                        int64_t value = *(int64_t *) property->data;
+                        event_property_long(env, core_instance, userdata, property->name, value);
+                        break;
+                    }
+                    case MPV_FORMAT_DOUBLE: {
+                        double value = *(double *) property->data;
+                        event_property_double(env, core_instance, userdata, property->name, value);
+                        break;
+                    }
+                    default: {
+                        LOGE("Property format %d not handled", property->format);
+                        break;
+                    }
+                }
+                break;
+            }
+            case MPV_EVENT_QUEUE_OVERFLOW: {
+                LOGE("MPV_EVENT_QUEUE_OVERFLOW received");
                 break;
             }
             default: {
-                LOGI("Unhandled event %s", mpv_event_name(event->event_id));
+                // Ignore
                 break;
             }
         }
-
-        // loop
     }
 
     pthread_mutex_lock(&event_thread->lock);
@@ -89,6 +152,8 @@ static void *event_thread_run(void *data) {
     // Free resources
 
     pthread_mutex_unlock(&event_thread->lock);
+
+    (*vm)->DetachCurrentThread(vm);
 
     return NULL;
 }

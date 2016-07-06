@@ -3,30 +3,32 @@ package org.floens.player.ui.controller;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Handler;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import org.floens.controller.utils.AndroidUtils;
 import org.floens.controller.Controller;
 import org.floens.controller.transition.FadeOutTransition;
 import org.floens.controller.ui.drawable.ArrowMenuDrawable;
+import org.floens.controller.utils.AndroidUtils;
 import org.floens.controller.utils.InsetsHelper;
+import org.floens.mpv.MpvCore;
+import org.floens.mpv.MpvFormat;
+import org.floens.mpv.MpvProperty;
+import org.floens.mpv.PropertyObserver;
+import org.floens.mpv.egl.EGLView;
+import org.floens.mpv.renderer.MpvRenderer;
 import org.floens.player.PlayerApplication;
 import org.floens.player.R;
-import org.floens.mpv.egl.EGLView;
+import org.floens.player.core.model.FileItem;
 import org.floens.player.ui.layout.PlayerControllerContainer;
 import org.floens.player.ui.layout.PlayerControls;
-import org.floens.player.core.model.FileItem;
-import org.floens.mpv.MpvCore;
-import org.floens.mpv.renderer.MpvRenderer;
 
 import static org.floens.controller.utils.AndroidUtils.setRoundItemBackground;
 
-public class PlayerController extends Controller implements View.OnClickListener, PlayerControls.Callback, View.OnSystemUiVisibilityChangeListener, View.OnTouchListener, PlayerControllerContainer.Callback {
+public class PlayerController extends Controller implements View.OnClickListener, PlayerControls.Callback, View.OnSystemUiVisibilityChangeListener, View.OnTouchListener, PlayerControllerContainer.Callback, PropertyObserver {
     private static final String TAG = "PlayerController";
 
     private static final long HIDE_TIME = 1200;
@@ -110,15 +112,27 @@ public class PlayerController extends Controller implements View.OnClickListener
         super.onShow();
         view.requestApplyInsets();
 
-
         AndroidUtils.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                mpvCore.observeProperty(PlayerController.this, "time-pos", MpvFormat.DOUBLE);
+                mpvCore.observeProperty(PlayerController.this, "pause", MpvFormat.FLAG);
+
                 mpvCore.command(new String[]{
                         "loadfile", fileItem.file.getAbsolutePath()
                 });
             }
         }, 500);
+    }
+
+    @Override
+    public void propertyChanged(MpvProperty property) {
+        switch (property.name) {
+            case "pause": {
+                setControlPlaying(((int) property.value) == 0);
+                break;
+            }
+        }
     }
 
     @Override
@@ -136,18 +150,18 @@ public class PlayerController extends Controller implements View.OnClickListener
 
     @Override
     public void pauseButtonClicked() {
-        setPlaying(false);
+        requestPlaying(false);
     }
 
     @Override
     public void playButtonClicked() {
-        setPlaying(true);
+        requestPlaying(true);
     }
 
     @Override
     public boolean onBack() {
         navigationController.popController(new FadeOutTransition());
-        setPlaying(false);
+        requestPlaying(false);
         return true;
     }
 
@@ -181,12 +195,10 @@ public class PlayerController extends Controller implements View.OnClickListener
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 touchDown = true;
-                Log.i(TAG, "touchDown = true");
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 touchDown = false;
-                Log.i(TAG, "touchDown = false");
                 break;
         }
         rescheduleHide();
@@ -201,33 +213,38 @@ public class PlayerController extends Controller implements View.OnClickListener
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-//        Log.d(TAG, "onWindowFocusChanged() called with: " + "hasFocus = [" + hasFocus + "]");
 
         if (!hasFocus) {
-            setPlaying(false);
+            requestPlaying(false);
         }
     }
 
     @Override
     public void onSystemUiVisibilityChange(int visibility) {
-//        Log.i(TAG, "onSystemUiVisibilityChange() called with: " + "visibility = [" + visibility + "]");
         rescheduleHide();
         playerControls.setHidden(isNavigationHidden(), true);
     }
 
-    private void setPlaying(boolean playing) {
-        this.playing = playing;
-        playerControls.setPlaying(playing);
-        rescheduleHide();
-        if (isNavigationHidden() && !playing) {
-            setUiHidden(false);
+    private void requestPlaying(boolean playing) {
+        mpvCore.command(new String[]{
+                "set", "pause", playing ? "no" : "yes"
+        });
+    }
+
+    private void setControlPlaying(boolean playing) {
+        if (this.playing != playing) {
+            this.playing = playing;
+            playerControls.setPlaying(playing);
+            rescheduleHide();
+            if (isNavigationHidden() && !playing) {
+                setUiHidden(false);
+            }
         }
     }
 
     private void rescheduleHide() {
         handler.removeCallbacks(hideUiRunnable);
         if (!isNavigationHidden() && playing && !touchDown) {
-            Log.i(TAG, "scheduling hide");
             handler.postDelayed(hideUiRunnable, HIDE_TIME);
         }
     }

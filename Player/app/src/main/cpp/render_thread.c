@@ -24,7 +24,7 @@ struct render_thread *render_thread_create(
 
     pthread_mutex_init(&render_thread->frame_wait_lock, NULL);
     pthread_cond_init(&render_thread->frame_wait, NULL);
-    render_thread->frame_available = 0;
+    render_thread->frame_available = 1;
 
     render_thread->running = 0;
 
@@ -52,6 +52,12 @@ void render_thread_stop(struct render_thread *render_thread) {
     pthread_mutex_lock(&render_thread->lock);
     render_thread->running = 0;
     pthread_mutex_unlock(&render_thread->lock);
+
+    pthread_mutex_lock(&render_thread->frame_wait_lock);
+    render_thread->frame_available = 1;
+    pthread_cond_broadcast(&render_thread->frame_wait);
+    pthread_mutex_unlock(&render_thread->frame_wait_lock);
+
     pthread_join(render_thread->thread, NULL);
 }
 
@@ -61,6 +67,11 @@ void render_thread_resize(struct render_thread *render_thread, int width, int he
     render_thread->width = width;
     render_thread->height = height;
     pthread_mutex_unlock(&render_thread->lock);
+
+    pthread_mutex_lock(&render_thread->frame_wait_lock);
+    render_thread->frame_available = 1;
+    pthread_cond_broadcast(&render_thread->frame_wait);
+    pthread_mutex_unlock(&render_thread->frame_wait_lock);
 }
 
 void render_thread_destroy(struct render_thread *render_thread) {
@@ -109,6 +120,12 @@ static void *render_thread_run(void *data) {
         mpv_opengl_cb_set_update_callback(render_thread->opengl_cb_context,
                                           update_callback, render_thread);
 
+        // TODO: after the first uninit the video track is reset to 0 (none)
+        // Setting this to 1 restarts the playback though and messes up the time the video
+        // was playing at.
+        uint64_t on = 1;
+        mpv_set_property(render_thread->mpv, "vid", MPV_FORMAT_INT64, &on);
+
         render_thread->running = 1;
         pthread_cond_broadcast(&render_thread->ready);
 
@@ -119,6 +136,16 @@ static void *render_thread_run(void *data) {
     int frames = 0;
 
     while (1) {
+        // Wait for available frames
+        {
+            pthread_mutex_lock(&render_thread->frame_wait_lock);
+            while (!render_thread->frame_available) {
+                pthread_cond_wait(&render_thread->frame_wait, &render_thread->frame_wait_lock);
+            }
+            render_thread->frame_available = 0;
+            pthread_mutex_unlock(&render_thread->frame_wait_lock);
+        }
+
         // Check if still running
         int run, width, height;
         {
@@ -130,16 +157,6 @@ static void *render_thread_run(void *data) {
         }
         if (!run) {
             break;
-        }
-
-        // Wait for available frames
-        {
-            pthread_mutex_lock(&render_thread->frame_wait_lock);
-            while (!render_thread->frame_available) {
-                pthread_cond_wait(&render_thread->frame_wait, &render_thread->frame_wait_lock);
-            }
-            render_thread->frame_available = 0;
-            pthread_mutex_unlock(&render_thread->frame_wait_lock);
         }
 
 //        int64_t draw_start = mpv_get_time_us(render_thread->mpv);
@@ -154,7 +171,8 @@ static void *render_thread_run(void *data) {
 
         int64_t now = mpv_get_time_us(render_thread->mpv);
         if (now - last_time >= 1000 * 1000) {
-            last_time += 1000 * 1000;
+            // last_time += 1000 * 1000;
+            last_time = now; // Don't play catch-up
             LOGI("Render fps %d", frames);
             frames = 0;
         }

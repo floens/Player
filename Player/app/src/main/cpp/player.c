@@ -6,18 +6,21 @@
 
 static struct player_context context = {0};
 
-int player_initialize(JNIEnv *env) {
+int player_initialize(JNIEnv *env, jobject core_instance) {
     // Requirement of mpv, see client.h
     setlocale(LC_NUMERIC, "C");
 
     LOGI("Mpv client version %lx", mpv_client_api_version());
 
+    context.env = env;
     if ((*env)->GetJavaVM(env, &context.vm)) {
         LOGE("Failed to get java vm");
         return 1;
     }
 
     av_jni_set_java_vm(context.vm, NULL);
+
+    context.core_instance = (*env)->NewGlobalRef(env, core_instance);
 
     context.mpv = mpv_create();
     if (!context.mpv) {
@@ -34,14 +37,16 @@ int player_initialize(JNIEnv *env) {
         log_mpv_error("hwdec mediacodec", res);
     }*/
 
-    if (mpv_initialize(context.mpv)) {
-        LOGE("Failed to initialize mpv");
+//    mpv_request_log_messages(context.mpv, "info");
+    mpv_request_log_messages(context.mpv, "v");
+
+    res = mpv_initialize(context.mpv);
+    if (res < 0) {
+        log_mpv_error("mpv_initialize()", res);
         return 1;
     }
 
-    mpv_request_log_messages(context.mpv, "info");
-
-    context.event_thread = event_thread_create(context.mpv);
+    context.event_thread = event_thread_create(&context);
     event_thread_start(context.event_thread);
 
     context.opengl_cb_context = mpv_get_sub_api(context.mpv, MPV_SUB_API_OPENGL_CB);
@@ -51,6 +56,12 @@ int player_initialize(JNIEnv *env) {
     }
 
     return 0;
+}
+
+void player_destroy() {
+    // TODO: after the context is not global anymore
+    JNIEnv *env = context.env;
+    (*env)->DeleteGlobalRef(env, context.core_instance);
 }
 
 int player_bind() {
@@ -81,6 +92,13 @@ void player_unbind() {
     context.render_thread = NULL;
 }
 
+void player_observe_property(uint64_t userdata, const char *name, mpv_format format) {
+    mpv_observe_property(context.mpv, userdata, name, format);
+}
+
 void player_handle_command(const char **command) {
-    mpv_command(context.mpv, command);
+    int res = mpv_command(context.mpv, command);
+    if (res < 0) {
+        log_mpv_error("mpv_command failed", res);
+    }
 }

@@ -1,21 +1,13 @@
 #include <jni.h>
 
-JNIEXPORT int
-JNICALL Java_org_floens_mpv_MpvCore_nativeInitialize(
-        JNIEnv *env, jobject instance);
+void event_no_data(JNIEnv *env, jobject core_instance, const char *event_name);
 
-JNIEXPORT int
-JNICALL Java_org_floens_mpv_MpvCore_nativeBind(
-        JNIEnv *env, jobject instance);
+void event_property_string(JNIEnv *env, jobject core_instance, uint64_t userdata, const char *name, const char *data);
 
-JNIEXPORT void
-JNICALL Java_org_floens_mpv_MpvCore_nativeResize(
-        JNIEnv *env, jobject instance, jint width, jint height);
+void event_property_flag(JNIEnv *env, jobject core_instance, uint64_t userdata, const char *name, int flag);
 
-JNIEXPORT void
-JNICALL Java_org_floens_mpv_MpvCore_nativeUnbind(
-        JNIEnv *env, jobject instance);
+void event_property_long(JNIEnv *env, jobject core_instance, uint64_t userdata, const char *name, int64_t value);
 
-JNIEXPORT void
-JNICALL Java_org_floens_mpv_MpvCore_nativeCommand(
-        JNIEnv *env, jobject instance, jobjectArray array);
+void event_property_double(JNIEnv *env, jobject core_instance, uint64_t userdata, const char *name, double value);
+
+JNIEXPORT void JNICALL Java_org_floens_mpv_MpvCore_registerNatives(JNIEnv *env, jclass cls);

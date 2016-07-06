@@ -13,10 +13,10 @@ struct event_thread {
 
     int running;
 
-    mpv_handle *mpv;
+    struct player_context *player_context;
 };
 
-struct event_thread *event_thread_create(mpv_handle *mpv);
+struct event_thread *event_thread_create(struct player_context *player_context);
 
 void event_thread_start(struct event_thread *event_thread);
 
