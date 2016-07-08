@@ -33,10 +33,16 @@ public class MpvCore {
         // TODO: Destroy what we initialized with nativeInitialize
     }
 
-    public void observeProperty(PropertyObserver observer, String name, MpvFormat format) {
+    public long observeProperty(PropertyObserver observer, String name, int format) {
         long userdata = propertyObserveCounter++;
-        observers.put(userdata, observer);
-        nativeObserveProperty(userdata, name, format.nativeInt);
+        observers.append(userdata, observer);
+        nativeObserveProperty(userdata, name, format);
+        return userdata;
+    }
+
+    public void unobserveProperty(long userdata) {
+        observers.remove(userdata);
+        nativeUnobserveProperty(userdata);
     }
 
     public void bind(int width, int height) {
@@ -70,27 +76,13 @@ public class MpvCore {
 
     private native void nativeObserveProperty(long userdata, String name, int format);
 
+    private native void nativeUnobserveProperty(long userdata);
+
     private void nativeEventNoData(String eventName) {
         Log.d(TAG, "nativeEventNoData() called with: eventName = [" + eventName + "]");
     }
 
-    private void nativeEventPropertyString(long userdata, String name, String data) {
-        notifyPropertyObservers(userdata, new MpvProperty(name, MpvFormat.STRING, data));
-    }
-
-    private void nativeEventPropertyFlag(long userdata, String name, int flag) {
-        notifyPropertyObservers(userdata, new MpvProperty(name, MpvFormat.FLAG, flag));
-    }
-
-    private void nativeEventPropertyLong(long userdata, String name, long value) {
-        notifyPropertyObservers(userdata, new MpvProperty(name, MpvFormat.LONG, value));
-    }
-
-    private void nativeEventPropertyDouble(long userdata, String name, double value) {
-        notifyPropertyObservers(userdata, new MpvProperty(name, MpvFormat.DOUBLE, value));
-    }
-
-    private void notifyPropertyObservers(final long userdata, final MpvProperty property) {
+    private void nativeEventProperty(final long userdata, final MpvProperty property) {
         handler.post(new Runnable() {
             @Override
             public void run() {

@@ -11,15 +11,17 @@ import javax.microedition.khronos.egl.EGLSurface;
 public class MpvRenderer implements EGLRenderer {
     private static final String TAG = "MpvRenderer";
 
-    private MpvCore mpvCore;
+    private final MpvCore mpvCore;
+    private final Callback callback;
 
     private EGLContext eglContext;
     private EGL10 egl;
     private EGLDisplay display;
     private EGLSurface surface;
 
-    public MpvRenderer(MpvCore mpvCore) {
+    public MpvRenderer(MpvCore mpvCore, Callback callback) {
         this.mpvCore = mpvCore;
+        this.callback = callback;
     }
 
     @Override
@@ -41,6 +43,10 @@ public class MpvRenderer implements EGLRenderer {
         this.surface = surface;
         // will unbind the egl surface from this thread
         mpvCore.bind(width, height);
+
+        if (callback != null) {
+            callback.mpvRendererBound();
+        }
     }
 
     @Override
@@ -50,7 +56,17 @@ public class MpvRenderer implements EGLRenderer {
 
     @Override
     public void unbind() {
+        if (callback != null) {
+            callback.mpvRendererUnbound();
+        }
+
         mpvCore.unbind();
         this.surface = null;
+    }
+
+    public interface Callback {
+        void mpvRendererBound();
+
+        void mpvRendererUnbound();
     }
 }

@@ -27,10 +27,8 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
     private float borderRadius = dp(25);
     private float borderWidth;
     private Paint borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private int borderAlpha = 0xaa;
     private RectF fillRect = new RectF();
     private Paint fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    private int fillAlpha = 0xdd;
 
     private TextView title;
     private Seeker seeker;
@@ -108,7 +106,11 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
     }
 
     public void setPlaying(boolean playing) {
-        playPauseButton.setSelected(playing ? 1 : 0);
+        playPauseButton.setSelected(playing ? 1 : 0, true);
+    }
+
+    public Seeker getSeeker() {
+        return seeker;
     }
 
     public void setCallback(Callback callback) {

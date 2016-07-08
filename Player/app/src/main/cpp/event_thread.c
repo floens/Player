@@ -49,12 +49,12 @@ void event_thread_destroy(struct event_thread *event_thread) {
 static void *event_thread_run(void *data) {
     struct event_thread *event_thread = data;
 
-    JNIEnv *env = event_thread->player_context->env;
     JavaVM *vm = event_thread->player_context->vm;
+    JNIEnv *env = NULL;
+    (*vm)->AttachCurrentThread(vm, &env, NULL);
+
     mpv_handle *mpv = event_thread->player_context->mpv;
     jobject core_instance = event_thread->player_context->core_instance;
-
-    (*vm)->AttachCurrentThread(vm, &env, NULL);
 
     pthread_mutex_lock(&event_thread->lock);
     event_thread->running = 1;
@@ -105,28 +105,13 @@ static void *event_thread_run(void *data) {
                 uint64_t userdata = event->reply_userdata;
 
                 switch (property->format) {
-                    case MPV_FORMAT_NONE: {
-                        LOGE("Received MPV_FORMAT_NONE");
-                        break;
-                    }
+                    case MPV_FORMAT_NONE:
                     case MPV_FORMAT_STRING:
-                    case MPV_FORMAT_OSD_STRING: {
-                        event_property_string(env, core_instance, userdata, property->name, property->data);
-                        break;
-                    }
-                    case MPV_FORMAT_FLAG: {
-                        int flag = *(int *) property->data;
-                        event_property_flag(env, core_instance, userdata, property->name, flag);
-                        break;
-                    }
-                    case MPV_FORMAT_INT64: {
-                        int64_t value = *(int64_t *) property->data;
-                        event_property_long(env, core_instance, userdata, property->name, value);
-                        break;
-                    }
+                    case MPV_FORMAT_OSD_STRING:
+                    case MPV_FORMAT_FLAG:
+                    case MPV_FORMAT_INT64:
                     case MPV_FORMAT_DOUBLE: {
-                        double value = *(double *) property->data;
-                        event_property_double(env, core_instance, userdata, property->name, value);
+                        event_property(env, core_instance, userdata, property);
                         break;
                     }
                     default: {

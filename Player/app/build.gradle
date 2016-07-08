@@ -2,16 +2,19 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "24.0.0"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "org.floens.player"
         minSdkVersion 21
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
-        cmake {
-            abiFilters 'arm64-v8a'
+
+        externalNativeBuild {
+            cmake {
+                abiFilters 'arm64-v8a'
+            }
         }
     }
 

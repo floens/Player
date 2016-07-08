@@ -3,6 +3,7 @@ package org.floens.player.ui.view;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 
 import org.floens.player.ui.layout.Slider;
@@ -11,10 +12,13 @@ import static org.floens.controller.utils.AndroidUtils.dp;
 import static org.floens.controller.utils.AndroidUtils.sp;
 
 public class Seeker extends Slider {
-    private Paint timePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    private final int timeTextSize = sp(12);
-    private final int timeWidth = dp(42 - 12);
+    private final int textTextSize = sp(12);
+    private final int textWidth = dp(42 - 12);
+
+    private String leftText;
+    private String rightText;
 
     public Seeker(Context context) {
         this(context, null);
@@ -27,30 +31,48 @@ public class Seeker extends Slider {
     public Seeker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        timePaint.setColor(0xffffffff);
-        timePaint.setTextSize(timeTextSize);
+        textPaint.setColor(0xffffffff);
+        textPaint.setTextSize(textTextSize);
 
         setThumbColor(0xffffffff);
         setBackgroundColor(0x11ffffff);
         setPastColor(0x44ffffff);
     }
 
+    public void setLeftText(String leftText) {
+        if (!TextUtils.equals(this.leftText, leftText)) {
+            this.leftText = leftText;
+            invalidate();
+        }
+    }
+
+    public void setRightText(String rightText) {
+        if (!TextUtils.equals(this.rightText, rightText)) {
+            this.rightText = rightText;
+            invalidate();
+        }
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        int left = timeWidth;
-        int right = getWidth() - timeWidth;
-        int y = getHeight() / 2 + timeTextSize / 2;
+        int left = textWidth;
+        int right = getWidth() - textWidth;
+        int y = getHeight() / 2 + textTextSize / 2;
 
-        drawTime(canvas, "1:49", left, y, true);
-        drawTime(canvas, "2:34", right, y, false);
+        if (leftText != null) {
+            drawtext(canvas, leftText, left, y, true);
+        }
+        if (rightText != null) {
+            drawtext(canvas, rightText, right, y, false);
+        }
     }
 
-    private void drawTime(Canvas canvas, String text, int x, int y, boolean floatRight) {
+    private void drawtext(Canvas canvas, String text, int x, int y, boolean floatRight) {
         if (floatRight) {
-            x -= timePaint.measureText(text);
+            x -= textPaint.measureText(text);
         }
-        canvas.drawText(text, x, y, timePaint);
+        canvas.drawText(text, x, y, textPaint);
     }
 }

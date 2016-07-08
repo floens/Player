@@ -1,6 +1,5 @@
 package org.floens.player.ui.view;
 
-import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -54,55 +53,46 @@ public class ReactiveButton extends View implements View.OnClickListener {
         }
     }
 
-    public void setSelected(int selected) {
+    public void setSelected(int selected, boolean animate) {
         if (this.selected != selected) {
             this.selected = selected;
-            drawable = drawables.get(selected);
-            invalidate();
+            onSelectedChanged(selected);
+
+            if (animate) {
+                final long duration = 160;
+
+                ValueAnimator alphaAnimator = ObjectAnimator.ofFloat(1f, 0f, 1f);
+                alphaAnimator.setDuration(duration);
+                alphaAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    private boolean switched;
+
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator animation) {
+                        drawableAlpha = (float) animation.getAnimatedValue();
+                        if (animation.getAnimatedFraction() >= 0.5f && !switched) {
+                            switched = true;
+                            drawable = drawables.get(ReactiveButton.this.selected);
+                        }
+                        invalidate();
+                    }
+                });
+                AnimatorSet set = new AnimatorSet();
+                set.playTogether(alphaAnimator, getScaleAnimation());
+                set.start();
+            } else {
+                drawable = drawables.get(selected);
+                invalidate();
+            }
         }
     }
 
     @Override
     public void onClick(View v) {
-        final float scale = 0.75f;
-        final long duration = 160;
-
-        List<Animator> animators = new ArrayList<>(2);
-        ValueAnimator scaleAnimator = ObjectAnimator.ofFloat(1f, scale, 1f);
-        scaleAnimator.setDuration(duration);
-        scaleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                drawableScale = (float) animation.getAnimatedValue();
-                invalidate();
-            }
-        });
-        animators.add(scaleAnimator);
-
         if (drawables.size() > 1) {
-            selected = (selected + 1) % drawables.size();
-            onSelectedChanged(selected);
-
-            ValueAnimator alphaAnimator = ObjectAnimator.ofFloat(1f, 0f, 1f);
-            alphaAnimator.setDuration(duration);
-            alphaAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                private boolean switched;
-
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    drawableAlpha = (float) animation.getAnimatedValue();
-                    if (animation.getAnimatedFraction() >= 0.5f && !switched) {
-                        switched = true;
-                        drawable = drawables.get(selected);
-                    }
-                    invalidate();
-                }
-            });
-            animators.add(alphaAnimator);
+            setSelected((selected + 1) % drawables.size(), true);
+        } else {
+            getScaleAnimation().start();
         }
-        AnimatorSet set = new AnimatorSet();
-        set.playTogether(animators);
-        set.start();
     }
 
     @Override
@@ -127,6 +117,22 @@ public class ReactiveButton extends View implements View.OnClickListener {
         if (callback != null) {
             callback.onButtonSelectedChanged(this, selected);
         }
+    }
+
+    private ValueAnimator getScaleAnimation() {
+        final float scale = 0.75f;
+        final long duration = 160;
+
+        ValueAnimator scaleAnimator = ObjectAnimator.ofFloat(1f, scale, 1f);
+        scaleAnimator.setDuration(duration);
+        scaleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                drawableScale = (float) animation.getAnimatedValue();
+                invalidate();
+            }
+        });
+        return scaleAnimator;
     }
 
     public interface Callback {

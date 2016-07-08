@@ -96,6 +96,10 @@ void player_observe_property(uint64_t userdata, const char *name, mpv_format for
     mpv_observe_property(context.mpv, userdata, name, format);
 }
 
+void player_unobserve_property(uint64_t userdata) {
+    mpv_unobserve_property(context.mpv, userdata);
+}
+
 void player_handle_command(const char **command) {
     int res = mpv_command(context.mpv, command);
     if (res < 0) {

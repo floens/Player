@@ -46,7 +46,7 @@ set_target_properties(lib_mpv PROPERTIES IMPORTED_LOCATION ${libs_dir}/${ANDROID
 
 include_directories(${libs_dir}/include)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 -fvisibility=hidden")
 
 add_library(player SHARED
     event_thread.c render_thread.c player_interface.c logger.c player.c
