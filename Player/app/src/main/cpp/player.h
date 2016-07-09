@@ -35,8 +35,12 @@ void player_resize(int width, int height);
 
 void player_unbind();
 
-void player_observe_property(uint64_t userdata, const char *name, mpv_format format);
+void player_observe_property(uint64_t userdata, const char *name);
 
 void player_unobserve_property(uint64_t userdata);
+
+int player_get_property(const char *name, mpv_node *node);
+
+void player_set_property(const char *name, mpv_node *node);
 
 void player_handle_command(const char **command);

@@ -62,6 +62,6 @@
         android:layout_weight="1"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:paddingBottom="@dimen/content_padding_bottom" />
+        android:layout_marginBottom="@dimen/content_padding_bottom" />
 
 </org.floens.player.ui.layout.FilesLayout>

@@ -3,9 +3,9 @@ package org.floens.mpv;
 public class MpvProperty {
     public final long userdata;
     public final String name;
-    public final MpvFormat format;
+    public final MpvNode format;
 
-    public MpvProperty(long userdata, String name, MpvFormat format) {
+    public MpvProperty(long userdata, String name, MpvNode format) {
         this.userdata = userdata;
         this.name = name;
         this.format = format;

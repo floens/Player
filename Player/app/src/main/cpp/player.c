@@ -92,12 +92,27 @@ void player_unbind() {
     context.render_thread = NULL;
 }
 
-void player_observe_property(uint64_t userdata, const char *name, mpv_format format) {
-    mpv_observe_property(context.mpv, userdata, name, format);
+void player_observe_property(uint64_t userdata, const char *name) {
+    mpv_observe_property(context.mpv, userdata, name, MPV_FORMAT_NODE);
 }
 
 void player_unobserve_property(uint64_t userdata) {
     mpv_unobserve_property(context.mpv, userdata);
+}
+
+int player_get_property(const char *name, mpv_node *node) {
+    int res = mpv_get_property(context.mpv, name, MPV_FORMAT_NODE, node);
+    if (res < 0) {
+        log_mpv_error("mpv_get_property", res);
+    }
+    return res;
+}
+
+void player_set_property(const char *name, mpv_node *node) {
+    int res = mpv_set_property(context.mpv, name, MPV_FORMAT_NODE, node);
+    if (res < 0) {
+        log_mpv_error("mpv_set_property", res);
+    }
 }
 
 void player_handle_command(const char **command) {

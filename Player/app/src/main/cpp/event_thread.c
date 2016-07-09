@@ -105,12 +105,7 @@ static void *event_thread_run(void *data) {
                 uint64_t userdata = event->reply_userdata;
 
                 switch (property->format) {
-                    case MPV_FORMAT_NONE:
-                    case MPV_FORMAT_STRING:
-                    case MPV_FORMAT_OSD_STRING:
-                    case MPV_FORMAT_FLAG:
-                    case MPV_FORMAT_INT64:
-                    case MPV_FORMAT_DOUBLE: {
+                    case MPV_FORMAT_NODE: {
                         event_property(env, core_instance, userdata, property);
                         break;
                     }

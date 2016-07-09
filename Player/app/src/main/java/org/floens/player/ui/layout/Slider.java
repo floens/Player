@@ -28,6 +28,7 @@ public class Slider extends View {
     private final int thumbUpRadius = dp(6);
     private final int thumbDownRadius = dp(8);
     private final int thumbGrabRadius = dp(30);
+    private final int requiredMinimumChangedPixels = dp(1);
 
     private int backgroundColor = 0xffFFA893;
     private int pastColor = 0xffFF6A4F;
@@ -63,7 +64,7 @@ public class Slider extends View {
     }
 
     public void setPosition(float position, boolean animate) {
-        setThumbPosition(position, animate);
+        setThumbPosition(position, animate, requiredMinimumChangedPixels);
     }
 
     public void setThumbColor(int thumbColor) {
@@ -170,6 +171,10 @@ public class Slider extends View {
     }
 
     private int getThumbX() {
+        return getThumbX(position);
+    }
+
+    private int getThumbX(float position) {
         return (int) ((getWidth() - getPaddingLeft() - getPaddingRight()) * position) + getPaddingLeft();
     }
 
@@ -178,8 +183,13 @@ public class Slider extends View {
     }
 
     private void setThumbPosition(float position, boolean animate) {
+        setThumbPosition(position, animate, 1);
+    }
+
+    private void setThumbPosition(float position, boolean animate, int minimumChanged) {
         position = Math.min(1f, Math.max(0f, position));
-        if (this.position != position) {
+        int thumbDiff = Math.abs(getThumbX() - getThumbX(position));
+        if (minimumChanged > 0 && thumbDiff >= minimumChanged) {
             this.position = position;
             if (callback != null) {
                 callback.onSliderChanged(position);
