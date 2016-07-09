@@ -12,27 +12,33 @@ import android.widget.ImageView;
 import org.floens.controller.Controller;
 import org.floens.controller.transition.FadeOutTransition;
 import org.floens.controller.ui.drawable.ArrowMenuDrawable;
+import org.floens.controller.utils.AndroidUtils;
 import org.floens.controller.utils.InsetsHelper;
 import org.floens.mpv.egl.EGLView;
 import org.floens.player.R;
 import org.floens.player.core.model.FileItem;
+import org.floens.player.core.model.Track;
 import org.floens.player.ui.layout.PlayerControllerContainer;
 import org.floens.player.ui.layout.PlayerControls;
+import org.floens.player.ui.layout.Slider;
 import org.floens.player.ui.presenter.PlayerPresenter;
 import org.floens.player.ui.view.Seeker;
 
+import java.util.List;
+
 import static org.floens.controller.utils.AndroidUtils.setRoundItemBackground;
 
-public class PlayerController extends Controller implements View.OnClickListener, PlayerControls.Callback, View.OnSystemUiVisibilityChangeListener, View.OnTouchListener, PlayerControllerContainer.Callback, PlayerPresenter.PlayerPresenterCallback {
+public class PlayerController extends Controller implements View.OnClickListener, PlayerControls.Callback, View.OnSystemUiVisibilityChangeListener, View.OnTouchListener, PlayerControllerContainer.Callback, PlayerPresenter.PlayerPresenterCallback, Slider.OnSliderChanged {
     private static final String TAG = "PlayerController";
 
-    private static final long HIDE_TIME = 1200;
+    private static final long HIDE_TIME = 1600;
 
     private PlayerControllerContainer container;
     private EGLView playerSurface;
     private ImageView back;
     private ViewGroup controlsContainer;
     private PlayerControls playerControls;
+    private Seeker seeker;
 
     private Handler handler;
     private GestureDetector gestureDetector;
@@ -63,6 +69,7 @@ public class PlayerController extends Controller implements View.OnClickListener
         super.onCreate();
 
         view = inflateRes(R.layout.controller_player);
+
         container = (PlayerControllerContainer) view;
         container.setCallback(this);
 
@@ -70,6 +77,9 @@ public class PlayerController extends Controller implements View.OnClickListener
         InsetsHelper.attachInsetsMargin(controlsContainer, true, true, true, true);
 
         playerSurface = (EGLView) view.findViewById(R.id.player_surface);
+        if (fileItem == null) {
+            AndroidUtils.removeFromParentView(playerSurface);
+        }
 
         back = (ImageView) view.findViewById(R.id.back);
         ArrowMenuDrawable drawable = new ArrowMenuDrawable();
@@ -80,6 +90,8 @@ public class PlayerController extends Controller implements View.OnClickListener
 
         playerControls = (PlayerControls) view.findViewById(R.id.player_controls);
         playerControls.setCallback(this);
+        seeker = playerControls.getSeeker();
+        seeker.setOnSliderChanged(this);
 
         view.setOnSystemUiVisibilityChangeListener(this);
         view.setOnTouchListener(this);
@@ -92,9 +104,22 @@ public class PlayerController extends Controller implements View.OnClickListener
 
         handler = new Handler();
 
-        presenter = new PlayerPresenter(this, fileItem);
-        playerSurface.setRenderer(presenter.getMpvRenderer());
+        if (fileItem != null) {
+            presenter = new PlayerPresenter(this, fileItem);
+            playerSurface.setRenderer(presenter.getMpvRenderer());
+        }
+
+//        annoySeeker.run();
     }
+
+    private Runnable annoySeeker = new Runnable() {
+        @Override
+        public void run() {
+            seeker.setPosition((float) (Math.random() * 1f));
+
+            AndroidUtils.runOnUiThread(annoySeeker, 500);
+        }
+    };
 
     @Override
     public void onDestroy() {
@@ -121,19 +146,42 @@ public class PlayerController extends Controller implements View.OnClickListener
 
     @Override
     public void setControlsProgress(double progress) {
-        playerControls.getSeeker().setPosition((float) progress, false);
+        seeker.setPosition((float) progress, false);
     }
 
     @Override
     public void setControlsTime(String time) {
-        Seeker seeker = playerControls.getSeeker();
         seeker.setLeftText(time);
     }
 
     @Override
     public void setControlsDuration(String duration) {
-        Seeker seeker = playerControls.getSeeker();
         seeker.setRightText(duration);
+    }
+
+    @Override
+    public void setControlsTitle(String title) {
+        playerControls.setTitle(title);
+    }
+
+    @Override
+    public void setSubtitleTracks(List<Track> tracks) {
+        playerControls.setSubtitleTracks(tracks);
+    }
+
+    @Override
+    public void setActiveSubtitle(int id) {
+        playerControls.setSubtitleSelectedId(id);
+    }
+
+    @Override
+    public void onSliderChanged(float position) {
+        presenter.onSeek(position);
+    }
+
+    @Override
+    public void onSubtitleClicked(int id) {
+        presenter.onSubtitlesClicked(id);
     }
 
     @Override

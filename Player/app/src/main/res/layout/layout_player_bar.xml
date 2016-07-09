@@ -21,7 +21,6 @@
             android:gravity="center_horizontal|top"
             android:maxLines="1"
             android:paddingTop="3dp"
-            android:text="@string/dummy_title"
             android:textColor="?attr/file_title_text_color"
             android:textSize="?attr/file_title_text_size" />
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +30,7 @@ public class Slider extends View {
     private final int thumbDownRadius = dp(8);
     private final int thumbGrabRadius = dp(30);
     private final int requiredMinimumChangedPixels = dp(1);
+    private final long debounceTime = 300;
 
     private int backgroundColor = 0xffFFA893;
     private int pastColor = 0xffFF6A4F;
@@ -41,6 +43,7 @@ public class Slider extends View {
     private ValueAnimator positionAnimator;
     private float drawPosition;
 
+    private Debouncer debouncer;
     private OnSliderChanged callback;
 
     public Slider(Context context) {
@@ -53,6 +56,7 @@ public class Slider extends View {
 
     public Slider(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        debouncer = new Debouncer(debounceTime);
     }
 
     public void setOnSliderChanged(OnSliderChanged callback) {
@@ -64,7 +68,9 @@ public class Slider extends View {
     }
 
     public void setPosition(float position, boolean animate) {
-        setThumbPosition(position, animate, requiredMinimumChangedPixels);
+        if (!down) {
+            setThumbPosition(position, animate, true, false);
+        }
     }
 
     public void setThumbColor(int thumbColor) {
@@ -95,23 +101,26 @@ public class Slider extends View {
                     downXoffset = 0f;
                     float pos = (event.getX() + getThumbOffsetX()) /
                             (float) (getWidth() - getPaddingLeft() - getPaddingRight());
-                    setThumbPosition(pos, false);
+                    setThumbPosition(pos, false, false, true);
                 }
 
                 return true;
             }
-            case MotionEvent.ACTION_MOVE: {
+            case MotionEvent.ACTION_MOVE:
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP: {
                 if (!down) {
                     break;
                 }
 
+                final boolean up = event.getAction() == MotionEvent.ACTION_UP;
+                if (up) {
+                    setDown(false);
+                }
+
                 setThumbPosition((event.getX() + getThumbOffsetX() - downXoffset) /
-                        (float) (getWidth() - getPaddingLeft() - getPaddingRight()), false);
-                return true;
-            }
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP: {
-                setDown(false);
+                        (float) (getWidth() - getPaddingLeft() - getPaddingRight()), false, !up, true);
+
                 return true;
             }
         }
@@ -182,18 +191,12 @@ public class Slider extends View {
         return -getPaddingLeft();
     }
 
-    private void setThumbPosition(float position, boolean animate) {
-        setThumbPosition(position, animate, 1);
-    }
-
-    private void setThumbPosition(float position, boolean animate, int minimumChanged) {
+    private void setThumbPosition(float position, boolean animate, boolean ignoreSmallChange, boolean notifyCallback) {
         position = Math.min(1f, Math.max(0f, position));
         int thumbDiff = Math.abs(getThumbX() - getThumbX(position));
-        if (minimumChanged > 0 && thumbDiff >= minimumChanged) {
+        if (!ignoreSmallChange || thumbDiff >= requiredMinimumChangedPixels) {
             this.position = position;
-            if (callback != null) {
-                callback.onSliderChanged(position);
-            }
+            debouncer.onNewValue(position, notifyCallback, !ignoreSmallChange);
 
             if (animate) {
                 if (positionAnimator != null) {
@@ -211,6 +214,10 @@ public class Slider extends View {
                 positionAnimator.setDuration(300);
                 positionAnimator.start();
             } else {
+                if (positionAnimator != null) {
+                    positionAnimator.end();
+                    positionAnimator = null;
+                }
                 drawPosition = position;
             }
 
@@ -220,5 +227,48 @@ public class Slider extends View {
 
     public interface OnSliderChanged {
         void onSliderChanged(float position);
+    }
+
+    private class Debouncer {
+        private final long debounceTime;
+        private long lastTime = 0;
+        private float value;
+        private Handler handler;
+        private Runnable runnable;
+
+        public Debouncer(long debounceTime) {
+            this.debounceTime = debounceTime;
+            handler = new Handler();
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (callback != null) {
+                        callback.onSliderChanged(value);
+                    }
+                }
+            };
+        }
+
+        public void onNewValue(float value, boolean notifyCallback, boolean force) {
+            this.value = value;
+
+            if (runnable != null) {
+                handler.removeCallbacks(runnable);
+            }
+
+            if (notifyCallback) {
+                long now = now();
+                if (now - lastTime > debounceTime || force) {
+                    runnable.run();
+                } else {
+                    handler.postDelayed(runnable, debounceTime);
+                }
+            }
+            lastTime = now();
+        }
+
+        private long now() {
+            return System.currentTimeMillis();
+        }
     }
 }

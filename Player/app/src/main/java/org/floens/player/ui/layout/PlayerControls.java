@@ -16,12 +16,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.floens.player.R;
+import org.floens.player.core.model.Track;
 import org.floens.player.ui.view.ReactiveButton;
 import org.floens.player.ui.view.Seeker;
 
+import java.util.List;
+
 import static org.floens.controller.utils.AndroidUtils.dp;
 
-public class PlayerControls extends LinearLayout implements ReactiveButton.Callback {
+public class PlayerControls extends LinearLayout implements ReactiveButton.Callback, TrackSwitcher.Callback {
     private static final int MAX_WIDTH = 500;
 
     private float borderRadius = dp(25);
@@ -32,6 +35,8 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
 
     private TextView title;
     private Seeker seeker;
+    private TrackSwitcher subtitlesTrackSwitcher;
+    private ReactiveButton subtitlesButton;
     private ReactiveButton prevButton;
     private ReactiveButton nextButton;
     private ReactiveButton playPauseButton;
@@ -113,6 +118,18 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
         return seeker;
     }
 
+    public void setTitle(String text) {
+        title.setText(text);
+    }
+
+    public void setSubtitleTracks(List<Track> tracks) {
+        subtitlesTrackSwitcher.setTracks(tracks);
+    }
+
+    public void setSubtitleSelectedId(int id) {
+        subtitlesTrackSwitcher.setSelectedId(id);
+    }
+
     public void setCallback(Callback callback) {
         this.callback = callback;
     }
@@ -138,11 +155,19 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
         super.onFinishInflate();
         title = (TextView) findViewById(R.id.title);
         seeker = (Seeker) findViewById(R.id.seeker);
+        subtitlesTrackSwitcher = (TrackSwitcher) findViewById(R.id.track_switcher_subtitles);
+        subtitlesTrackSwitcher.setCallback(this);
+        subtitlesButton = (ReactiveButton) subtitlesTrackSwitcher.findViewById(R.id.track_switcher_button);
+        subtitlesButton.addDrawable(getResources().getDrawable(R.drawable.ic_subtitles_white_24dp));
         prevButton = (ReactiveButton) findViewById(R.id.button_prev);
+        prevButton.addDrawable(getResources().getDrawable(R.drawable.ic_fast_rewind_white_36dp));
         prevButton.setCallback(this);
         nextButton = (ReactiveButton) findViewById(R.id.button_next);
+        nextButton.addDrawable(getResources().getDrawable(R.drawable.ic_fast_forward_white_36dp));
         nextButton.setCallback(this);
         playPauseButton = (ReactiveButton) findViewById(R.id.button_play_pause);
+        playPauseButton.addDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_white_56dp));
+        playPauseButton.addDrawable(getResources().getDrawable(R.drawable.ic_pause_white_56dp));
         playPauseButton.setCallback(this);
     }
 
@@ -159,7 +184,7 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
     }
 
     @Override
-    public void onButtonSelectedChanged(ReactiveButton button, int selected) {
+    public void onButtonClicked(ReactiveButton button, int selected) {
         if (button == prevButton) {
             callback.prevButtonClicked();
         } else if (button == nextButton) {
@@ -170,6 +195,13 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
             } else {
                 callback.playButtonClicked();
             }
+        }
+    }
+
+    @Override
+    public void onTrackChanged(TrackSwitcher trackSwitcher, int id) {
+        if (trackSwitcher == subtitlesTrackSwitcher) {
+            callback.onSubtitleClicked(id);
         }
     }
 
@@ -228,5 +260,7 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
         void pauseButtonClicked();
 
         void playButtonClicked();
+
+        void onSubtitleClicked(int id);
     }
 }

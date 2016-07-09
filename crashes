@@ -1,0 +1,4 @@
+
+in out/opengl/video.c at line 2268 trc_dst can be MP_CSP_TRC_AUTO, but the pass_delinearize aborts on that value.
+p->image_params.gamma is AUTO too.
+happened on initialize.

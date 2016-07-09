@@ -103,7 +103,7 @@ void player_unobserve_property(uint64_t userdata) {
 int player_get_property(const char *name, mpv_node *node) {
     int res = mpv_get_property(context.mpv, name, MPV_FORMAT_NODE, node);
     if (res < 0) {
-        log_mpv_error("mpv_get_property", res);
+        LOGE("mpv_get_property %s %s", name, mpv_error_string(res));
     }
     return res;
 }
@@ -111,7 +111,7 @@ int player_get_property(const char *name, mpv_node *node) {
 void player_set_property(const char *name, mpv_node *node) {
     int res = mpv_set_property(context.mpv, name, MPV_FORMAT_NODE, node);
     if (res < 0) {
-        log_mpv_error("mpv_set_property", res);
+        LOGE("mpv_set_property %s %s", name, mpv_error_string(res));
     }
 }
 

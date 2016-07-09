@@ -56,7 +56,7 @@ public class ReactiveButton extends View implements View.OnClickListener {
     public void setSelected(int selected, boolean animate) {
         if (this.selected != selected) {
             this.selected = selected;
-            onSelectedChanged(selected);
+            notifyButtonClicked(selected);
 
             if (animate) {
                 final long duration = 160;
@@ -92,6 +92,7 @@ public class ReactiveButton extends View implements View.OnClickListener {
             setSelected((selected + 1) % drawables.size(), true);
         } else {
             getScaleAnimation().start();
+            notifyButtonClicked(0);
         }
     }
 
@@ -113,9 +114,9 @@ public class ReactiveButton extends View implements View.OnClickListener {
         canvas.restore();
     }
 
-    private void onSelectedChanged(int selected) {
+    private void notifyButtonClicked(int selected) {
         if (callback != null) {
-            callback.onButtonSelectedChanged(this, selected);
+            callback.onButtonClicked(this, selected);
         }
     }
 
@@ -136,6 +137,6 @@ public class ReactiveButton extends View implements View.OnClickListener {
     }
 
     public interface Callback {
-        void onButtonSelectedChanged(ReactiveButton button, int selected);
+        void onButtonClicked(ReactiveButton button, int selected);
     }
 }

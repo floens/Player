@@ -3,12 +3,12 @@ package org.floens.mpv;
 public class MpvProperty {
     public final long userdata;
     public final String name;
-    public final MpvNode format;
+    public final MpvNode value;
 
-    public MpvProperty(long userdata, String name, MpvNode format) {
+    public MpvProperty(long userdata, String name, MpvNode value) {
         this.userdata = userdata;
         this.name = name;
-        this.format = format;
+        this.value = value;
     }
 
     @Override
@@ -16,15 +16,9 @@ public class MpvProperty {
         return "MpvProperty{" +
                 "userdata=" + userdata +
                 ", name='" + name + '\'' +
-                ", format=" + format +
+                ", format=" + value +
                 '}';
     }
 
-    public boolean asBoolean() {
-        return (boolean) format.value;
-    }
 
-    public double asDouble() {
-        return format.value == null ? 0.0 : (double) format.value;
-    }
 }
