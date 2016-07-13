@@ -104,6 +104,22 @@ host_arches=(
     [x86_64]=x86_64-linux-android
 )
 
+# 'arm': ['armeabi', 'armeabi-v7a'],
+# 'arm64': ['arm64-v8a'],
+# 'mips': ['mips'],
+# 'mips64': ['mips64'],
+# 'x86': ['x86'],
+# 'x86_64': ['x86_64'],
+
+# Drop support for armeabi
+declare -A host_abis
+host_abis=(
+    [arm]=armeabi-v7a
+    [arm64]=arm64-v8a
+    [x86]=x86
+    [x86_64]=x86_64
+)
+
 configure_freetype2() {
     local host=$1
     local prefix_dir=$2
@@ -381,8 +397,8 @@ copy_libs() {
 
     local applibs=Player/app/libs
 
-    # local libdest=$applibs/$arch
-    local libdest=$applibs/arm64-v8a
+    local abi=${host_abis[$arch]}
+    local libdest=$applibs/$abi
     mkdir -p $libdest
 
     cp $prefix_dir/lib/libmpv.a $libdest/
