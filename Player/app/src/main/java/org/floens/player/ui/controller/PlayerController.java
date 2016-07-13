@@ -53,6 +53,7 @@ public class PlayerController extends Controller implements View.OnClickListener
     private FileItem fileItem;
     private boolean playing = false;
     private boolean touchDown = false;
+    private boolean ignoreSingleTap = false;
 
     private PlayerPresenter presenter;
 
@@ -108,18 +109,7 @@ public class PlayerController extends Controller implements View.OnClickListener
             presenter = new PlayerPresenter(this, fileItem);
             playerSurface.setRenderer(presenter.getMpvRenderer());
         }
-
-//        annoySeeker.run();
     }
-
-    private Runnable annoySeeker = new Runnable() {
-        @Override
-        public void run() {
-            seeker.setPosition((float) (Math.random() * 1f));
-
-            AndroidUtils.runOnUiThread(annoySeeker, 500);
-        }
-    };
 
     @Override
     public void onDestroy() {
@@ -220,8 +210,9 @@ public class PlayerController extends Controller implements View.OnClickListener
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        onTouch(event);
-        gestureDetector.onTouchEvent(event);
+        if (onTouch(event)) {
+            gestureDetector.onTouchEvent(event);
+        }
         return true;
     }
 
@@ -252,17 +243,30 @@ public class PlayerController extends Controller implements View.OnClickListener
         playerControls.setHidden(isNavigationHidden(), true);
     }
 
-    private void onTouch(MotionEvent event) {
+    private boolean onTouch(MotionEvent event) {
+        boolean res = true;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 touchDown = true;
+                if (isNavigationHidden()) {
+                    setUiHidden(false);
+                    // Don't give this touch to the gesture detector,
+                    // or it'll recognize as a tap and immediately hide the ui again.
+                    res = false;
+                    ignoreSingleTap = true;
+                }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                if (ignoreSingleTap) {
+                    res = false;
+                    ignoreSingleTap = false;
+                }
                 touchDown = false;
                 break;
         }
         rescheduleHide();
+        return res;
     }
 
     private boolean onSingleTapUp(MotionEvent e) {
