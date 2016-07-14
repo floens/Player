@@ -1,12 +1,11 @@
 package org.floens.mpv.egl;
 
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
+import android.opengl.EGLContext;
+import android.opengl.EGLDisplay;
+import android.opengl.EGLSurface;
 
 public interface EGLRenderer {
-    void create(EGLContext eglContext, EGL10 egl, EGLDisplay display);
+    void create(EGLContext eglContext, EGLDisplay display);
 
     void bind(EGLSurface surface, int width, int height);
 

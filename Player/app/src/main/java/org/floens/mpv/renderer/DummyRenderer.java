@@ -1,5 +1,9 @@
 package org.floens.mpv.renderer;
 
+import android.opengl.EGL14;
+import android.opengl.EGLContext;
+import android.opengl.EGLDisplay;
+import android.opengl.EGLSurface;
 import android.opengl.Matrix;
 import android.util.Log;
 
@@ -7,11 +11,6 @@ import org.floens.mpv.egl.EGLHelper;
 import org.floens.mpv.egl.EGLRenderer;
 
 import java.nio.FloatBuffer;
-
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
 
 import static android.opengl.GLES20.GL_ARRAY_BUFFER;
 import static android.opengl.GLES20.GL_COLOR_BUFFER_BIT;
@@ -69,7 +68,6 @@ public class DummyRenderer implements EGLRenderer {
             "}";
 
     private EGLContext eglContext;
-    private EGL10 egl;
     private EGLDisplay display;
     private EGLSurface surface;
 
@@ -82,22 +80,20 @@ public class DummyRenderer implements EGLRenderer {
     }
 
     @Override
-    public void create(EGLContext eglContext, EGL10 egl, EGLDisplay display) {
+    public void create(EGLContext eglContext, EGLDisplay display) {
         this.eglContext = eglContext;
-        this.egl = egl;
         this.display = display;
     }
 
     @Override
     public void destroy() {
-        this.egl = null;
     }
 
     @Override
     public void bind(EGLSurface surface, int width, int height) {
         this.surface = surface;
 
-        if (!egl.eglMakeCurrent(display, surface, surface, eglContext)) {
+        if (!EGL14.eglMakeCurrent(display, surface, surface, eglContext)) {
             Log.e(TAG, "eglMakeCurrent failed");
         }
 
@@ -147,7 +143,7 @@ public class DummyRenderer implements EGLRenderer {
 
         triangleBuffer = buffers[0];
 
-        if (!egl.eglMakeCurrent(display, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT)) {
+        if (!EGL14.eglMakeCurrent(display, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_CONTEXT)) {
             Log.e(TAG, "eglMakeCurrent unbind failed");
         }
 
@@ -178,7 +174,7 @@ public class DummyRenderer implements EGLRenderer {
 
         @Override
         public void run() {
-            if (!egl.eglMakeCurrent(display, surface, surface, eglContext)) {
+            if (!EGL14.eglMakeCurrent(display, surface, surface, eglContext)) {
                 Log.e(TAG, "eglMakeCurrent failed");
             }
 
@@ -211,15 +207,15 @@ public class DummyRenderer implements EGLRenderer {
                     }
                 }
 
-                if (!egl.eglSwapBuffers(display, surface)) {
-                    Log.e(TAG, EGLHelper.formatEglError("eglSwapBuffers", egl.eglGetError()));
+                if (!EGL14.eglSwapBuffers(display, surface)) {
+                    Log.e(TAG, EGLHelper.formatEglError("eglSwapBuffers", EGL14.eglGetError()));
                 }
 
                 frames++;
 
                 long now = System.nanoTime();
                 if (now - lastReportTime >= 1_000_000_000) {
-                    Log.d(TAG, "frames: " + frames + "/s");
+//                    Log.d(TAG, "frames: " + frames + "/s");
                     frames = 0;
                     lastReportTime += 1_000_000_000;
                 }

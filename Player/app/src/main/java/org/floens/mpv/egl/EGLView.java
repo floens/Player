@@ -2,17 +2,16 @@ package org.floens.mpv.egl;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.opengl.EGL14;
+import android.opengl.EGLConfig;
+import android.opengl.EGLContext;
+import android.opengl.EGLDisplay;
+import android.opengl.EGLSurface;
+import android.opengl.GLES20;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
-import javax.microedition.khronos.opengles.GL10;
 
 public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = "EGLView";
@@ -26,7 +25,6 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
 
     private EGLRenderer renderer;
 
-    private EGL10 egl;
     private EGLDisplay display;
     private EGLConfig config;
     private EGLContext eglContext;
@@ -50,10 +48,6 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
         holder.addCallback(this);
 
         eglHelper = new EGLHelper();
-        egl = (EGL10) EGLContext.getEGL();
-        if (egl == null) {
-            throw new RuntimeException("Could not get EGL context");
-        }
     }
 
     public void setRenderer(EGLRenderer renderer) {
@@ -109,11 +103,10 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
 
     private void goToState(int newState) {
         if (state != newState) {
-            Log.i(TAG, "go to state " + newState);
             if (newState > state) {
                 if (newState >= STATE_CREATED && state < STATE_CREATED) {
                     create();
-                    renderer.create(eglContext, egl, display);
+                    renderer.create(eglContext, display);
                     state = STATE_CREATED;
                 }
                 if (newState >= STATE_BOUND && state < STATE_BOUND) {
@@ -138,38 +131,36 @@ public class EGLView extends SurfaceView implements SurfaceHolder.Callback {
 
     private void create() {
         Log.d(TAG, "create()");
-        display = eglHelper.initialize(egl);
-        config = eglHelper.chooseConfig(egl, display);
-        eglContext = eglHelper.createContext(egl, display, config);
+        display = eglHelper.initialize();
+        config = eglHelper.chooseConfig(display);
+        eglContext = eglHelper.createContext(display, config);
     }
 
     private void destroy() {
         Log.d(TAG, "destroy()");
-        eglHelper.destroyContext(egl, display, eglContext);
+        eglHelper.destroyContext(display, eglContext);
         eglContext = null;
-        eglHelper.terminate(egl, display);
+        eglHelper.terminate(display);
         display = null;
-        egl = null;
         config = null;
     }
 
     private void bind() {
         Log.d(TAG, "bind()");
 
-        windowSurface = eglHelper.createWindowSurface(egl, display, config, getHolder());
-        if (!egl.eglMakeCurrent(display, windowSurface, windowSurface, eglContext)) {
+        windowSurface = eglHelper.createWindowSurface(display, config, getHolder());
+        if (!EGL14.eglMakeCurrent(display, windowSurface, windowSurface, eglContext)) {
             Log.e(TAG, "eglMakeCurrent failed");
         }
 
-        GL10 gl10 = (GL10) eglContext.getGL();
-        String glVersion = gl10.glGetString(GL10.GL_VERSION);
-        Log.i(TAG, "glVersion: " + glVersion);
+        String glVersion = GLES20.glGetString(GLES20.GL_VERSION);
+        Log.i(TAG, "GL_VERSION: " + glVersion);
     }
 
     private void unbind() {
         Log.d(TAG, "unbind()");
 
-        eglHelper.destroySurface(egl, display, windowSurface);
+        eglHelper.destroySurface(display, windowSurface);
 
         windowSurface = null;
     }

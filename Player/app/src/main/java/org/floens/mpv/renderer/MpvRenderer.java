@@ -1,12 +1,11 @@
 package org.floens.mpv.renderer;
 
+import android.opengl.EGLContext;
+import android.opengl.EGLDisplay;
+import android.opengl.EGLSurface;
+
 import org.floens.mpv.MpvCore;
 import org.floens.mpv.egl.EGLRenderer;
-
-import javax.microedition.khronos.egl.EGL10;
-import javax.microedition.khronos.egl.EGLContext;
-import javax.microedition.khronos.egl.EGLDisplay;
-import javax.microedition.khronos.egl.EGLSurface;
 
 public class MpvRenderer implements EGLRenderer {
     private static final String TAG = "MpvRenderer";
@@ -15,7 +14,6 @@ public class MpvRenderer implements EGLRenderer {
     private final Callback callback;
 
     private EGLContext eglContext;
-    private EGL10 egl;
     private EGLDisplay display;
     private EGLSurface surface;
 
@@ -25,15 +23,13 @@ public class MpvRenderer implements EGLRenderer {
     }
 
     @Override
-    public void create(EGLContext eglContext, EGL10 egl, EGLDisplay display) {
+    public void create(EGLContext eglContext, EGLDisplay display) {
         this.eglContext = eglContext;
-        this.egl = egl;
         this.display = display;
     }
 
     @Override
     public void destroy() {
-        this.egl = null;
         this.eglContext = null;
         this.display = null;
     }
