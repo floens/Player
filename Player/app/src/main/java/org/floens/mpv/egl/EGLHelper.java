@@ -57,11 +57,15 @@ public class EGLHelper {
                 EGL14.EGL_NONE};
 
         int[] numberOfConfigs = new int[1];
-        if (!EGL14.eglChooseConfig(display, configSpec, 0, null, 0, 0, numberOfConfigs, 0)) {
+        EGLConfig[] configs = new EGLConfig[100];
+        // Spec conflict: spec allows passing NULL to the configs to see how many configs there
+        // are for the attribs, but the wrapper throws illegalargumentexception instead.
+        // Call it with a huge number instead as workaround.
+        if (!EGL14.eglChooseConfig(display, configSpec, 0, configs, 0, 100, numberOfConfigs, 0)) {
             throwEglException("eglChooseConfig#1");
         }
-//        Log.i(TAG, "We have " + numberOfConfigs[0] + " matching configs available in total");
-        EGLConfig[] configs = new EGLConfig[numberOfConfigs[0]];
+        Log.i(TAG, "We have " + numberOfConfigs[0] + " matching configs available in total");
+        configs = new EGLConfig[numberOfConfigs[0]];
         if (!EGL14.eglChooseConfig(display, configSpec, 0, configs, 0, configs.length, numberOfConfigs, 0)) {
             throwEglException("eglChooseConfig#2");
         }
@@ -101,7 +105,9 @@ public class EGLHelper {
     }
 
     public EGLSurface createWindowSurface(EGLDisplay display, EGLConfig config, Object nativeWindow) {
-        EGLSurface eglSurface = EGL14.eglCreateWindowSurface(display, config, nativeWindow, null, 0);
+        EGLSurface eglSurface = EGL14.eglCreateWindowSurface(display, config, nativeWindow, new int[]{
+                EGL14.EGL_NONE
+        }, 0);
         if (eglSurface == null) {
             throwEglException("eglCreateWindowSurface");
         }
