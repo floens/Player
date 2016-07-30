@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import org.floens.controller.Controller;
 import org.floens.controller.transition.FadeOutTransition;
 import org.floens.controller.ui.drawable.ArrowMenuDrawable;
-import org.floens.controller.utils.AndroidUtils;
 import org.floens.controller.utils.InsetsHelper;
 import org.floens.mpv.egl.EGLView;
 import org.floens.player.R;
@@ -78,9 +77,6 @@ public class PlayerController extends Controller implements View.OnClickListener
         InsetsHelper.attachInsetsMargin(controlsContainer, true, true, true, true);
 
         playerSurface = (EGLView) view.findViewById(R.id.player_surface);
-        if (fileItem == null) {
-            AndroidUtils.removeFromParentView(playerSurface);
-        }
 
         back = (ImageView) view.findViewById(R.id.back);
         ArrowMenuDrawable drawable = new ArrowMenuDrawable();
@@ -105,10 +101,9 @@ public class PlayerController extends Controller implements View.OnClickListener
 
         handler = new Handler();
 
-        if (fileItem != null) {
-            presenter = new PlayerPresenter(this, fileItem);
-            playerSurface.setRenderer(presenter.getMpvRenderer());
-        }
+        presenter = new PlayerPresenter(this, fileItem);
+        playerSurface.setRenderer(presenter.getMpvRenderer());
+//        playerSurface.setRenderer(new DummyRenderer());
     }
 
     @Override
@@ -165,6 +160,11 @@ public class PlayerController extends Controller implements View.OnClickListener
     }
 
     @Override
+    public void setHardwareDecodingActive(boolean hardwareDecodingActive) {
+        playerControls.setHardwareDecodingActive(hardwareDecodingActive);
+    }
+
+    @Override
     public void onSliderChanged(float position) {
         presenter.onSeek(position);
     }
@@ -172,6 +172,11 @@ public class PlayerController extends Controller implements View.OnClickListener
     @Override
     public void onSubtitleClicked(int id) {
         presenter.onSubtitlesClicked(id);
+    }
+
+    @Override
+    public void hwDecButtonClicked() {
+        presenter.toggleHwDec();
     }
 
     @Override

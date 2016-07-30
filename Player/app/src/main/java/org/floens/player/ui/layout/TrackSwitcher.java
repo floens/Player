@@ -38,6 +38,7 @@ public class TrackSwitcher extends LinearLayout implements ReactiveButton.Callba
 
     public void setTracks(List<Track> tracks) {
         this.tracks = tracks;
+        button.setEnabled(tracks != null && !tracks.isEmpty());
         updateText();
     }
 
@@ -52,12 +53,13 @@ public class TrackSwitcher extends LinearLayout implements ReactiveButton.Callba
 
         button = (ReactiveButton) findViewById(R.id.track_switcher_button);
         button.setCallback(this);
+        button.setDoScaleAnimation(false);
         text = (TextView) findViewById(R.id.track_switcher_text);
     }
 
     @Override
     public void onButtonClicked(ReactiveButton button, int selected) {
-        if (tracks == null) {
+        if (tracks == null || tracks.isEmpty()) {
             return;
         }
 
@@ -83,21 +85,21 @@ public class TrackSwitcher extends LinearLayout implements ReactiveButton.Callba
     }
 
     private void updateText() {
-        if (tracks == null) {
-            return;
-        }
-
-        String left = "-";
-        if (selectedId > 0) {
-            for (int i = 0; i < tracks.size(); i++) {
-                Track track = tracks.get(i);
-                if (track.id == selectedId) {
-                    left = String.valueOf(i + 1);
-                    break;
+        if (tracks == null || tracks.isEmpty()) {
+            text.setText("");
+        } else {
+            String left = "-";
+            if (selectedId > 0) {
+                for (int i = 0; i < tracks.size(); i++) {
+                    Track track = tracks.get(i);
+                    if (track.id == selectedId) {
+                        left = String.valueOf(i + 1);
+                        break;
+                    }
                 }
             }
+            text.setText(left + "/" + tracks.size());
         }
-        text.setText(left + "/" + tracks.size());
     }
 
     public interface Callback {

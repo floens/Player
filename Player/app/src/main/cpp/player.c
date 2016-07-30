@@ -32,10 +32,6 @@ int player_initialize(JNIEnv *env, jobject core_instance) {
     if (res < 0) {
         log_mpv_error("vo opengl-cb", res);
     }
-    /*res = mpv_set_option_string(context.mpv, "hwdec", "mediacodec");
-    if (res < 0) {
-        log_mpv_error("hwdec mediacodec", res);
-    }*/
 
 //    mpv_request_log_messages(context.mpv, "info");
     mpv_request_log_messages(context.mpv, "v");

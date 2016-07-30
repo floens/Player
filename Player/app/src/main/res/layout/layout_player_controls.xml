@@ -78,12 +78,14 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp" />
 
-        <Space
-            android:layout_width="60dp"
+        <org.floens.player.ui.view.ReactiveButton
+            android:id="@+id/button_hw_dec"
+            android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="16dp" />
+            android:layout_marginRight="40dp"
+            android:background="#ffff0000" />
 
     </LinearLayout>
 

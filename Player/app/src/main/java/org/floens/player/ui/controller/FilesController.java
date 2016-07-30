@@ -22,6 +22,8 @@ import org.floens.player.ui.layout.FilesLayout;
 import org.floens.player.core.model.FileItem;
 import org.floens.player.core.model.FileItems;
 
+import java.io.File;
+
 public class FilesController extends Controller implements FileWatcher.FileWatcherCallback, FilesAdapter.Callback, FilesLayout.Callback {
     private static final String TAG = "FilesController";
 
@@ -51,7 +53,9 @@ public class FilesController extends Controller implements FileWatcher.FileWatch
         InsetsHelper.attachInsetsMargin(filesLayout.getBackLayout(), false, true, false, false);
         InsetsHelper.attachInsetsMargin(filesLayout.getStorageText(), false, true, false, false);
 
-        fileWatcher = new FileWatcher(this, Environment.getExternalStorageDirectory());
+//        File startFolder = Environment.getExternalStorageDirectory();
+        File startFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+        fileWatcher = new FileWatcher(this, startFolder);
 
         runtimePermissionsHelper = ((StartActivity) context).getRuntimePermissionsHelper();
         gotPermission = hasPermission();

@@ -1,5 +1,6 @@
 package org.floens.player.ui.view;
 
+import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -7,6 +8,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -23,6 +25,7 @@ public class ReactiveButton extends View implements View.OnClickListener {
     private Rect bounds = new Rect();
     private float drawableAlpha = 1f;
     private float drawableScale = 1f;
+    private boolean doScaleAnimation = true;
 
     private Callback callback;
 
@@ -46,11 +49,22 @@ public class ReactiveButton extends View implements View.OnClickListener {
         this.callback = callback;
     }
 
+    public void setDoScaleAnimation(boolean doScaleAnimation) {
+        this.doScaleAnimation = doScaleAnimation;
+    }
+
     public void addDrawable(Drawable drawable) {
+        drawable = DrawableCompat.wrap(drawable.mutate());
         drawables.add(drawable);
         if (drawables.size() == 1) {
             this.drawable = drawables.get(0);
         }
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        invalidate();
     }
 
     public void setSelected(int selected, boolean animate) {
@@ -77,7 +91,12 @@ public class ReactiveButton extends View implements View.OnClickListener {
                     }
                 });
                 AnimatorSet set = new AnimatorSet();
-                set.playTogether(alphaAnimator, getScaleAnimation());
+                List<Animator> animators = new ArrayList<>(2);
+                animators.add(alphaAnimator);
+                if (doScaleAnimation) {
+                    animators.add(getScaleAnimation());
+                }
+                set.playTogether(animators);
                 set.start();
             } else {
                 drawable = drawables.get(selected);
@@ -91,7 +110,9 @@ public class ReactiveButton extends View implements View.OnClickListener {
         if (drawables.size() > 1) {
             setSelected((selected + 1) % drawables.size(), true);
         } else {
-            getScaleAnimation().start();
+            if (doScaleAnimation) {
+                getScaleAnimation().start();
+            }
             notifyButtonClicked(0);
         }
     }
@@ -109,7 +130,7 @@ public class ReactiveButton extends View implements View.OnClickListener {
         canvas.scale(drawableScale, drawableScale, getWidth() / 2f, getHeight() / 2f);
 
         drawable.setBounds(bounds);
-        drawable.setAlpha((int) (255 * drawableAlpha));
+        drawable.setAlpha((int) (255 * drawableAlpha * (isEnabled() ? 1f : 0.54f)));
         drawable.draw(canvas);
         canvas.restore();
     }

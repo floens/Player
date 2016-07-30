@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import org.floens.player.R;
 import org.floens.player.core.model.Track;
+import org.floens.player.ui.drawable.TextDrawable;
 import org.floens.player.ui.view.ReactiveButton;
 import org.floens.player.ui.view.Seeker;
 
@@ -40,6 +41,7 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
     private ReactiveButton prevButton;
     private ReactiveButton nextButton;
     private ReactiveButton playPauseButton;
+    private ReactiveButton hwDecButton;
 
     private boolean hidden = false;
     private ValueAnimator alphaAnimator;
@@ -130,6 +132,12 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
         subtitlesTrackSwitcher.setSelectedId(id);
     }
 
+    public void setHardwareDecodingActive(boolean hardwareDecodingActive) {
+        hwDecButton.setCallback(null); // TODO
+        hwDecButton.setSelected(hardwareDecodingActive ? 1 : 0, true);
+        hwDecButton.setCallback(this);
+    }
+
     public void setCallback(Callback callback) {
         this.callback = callback;
     }
@@ -169,6 +177,11 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
         playPauseButton.addDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_white_56dp));
         playPauseButton.addDrawable(getResources().getDrawable(R.drawable.ic_pause_white_56dp));
         playPauseButton.setCallback(this);
+        hwDecButton = (ReactiveButton) findViewById(R.id.button_hw_dec);
+        hwDecButton.addDrawable(new TextDrawable("SW", dp(36), dp(36), 0xffffffff, dp(14)));
+        hwDecButton.addDrawable(new TextDrawable("HW", dp(36), dp(36), 0xffffffff, dp(14)));
+        hwDecButton.setDoScaleAnimation(false);
+        hwDecButton.setCallback(this);
     }
 
     @Override
@@ -195,6 +208,8 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
             } else {
                 callback.playButtonClicked();
             }
+        } else if (button == hwDecButton) {
+            callback.hwDecButtonClicked();
         }
     }
 
@@ -262,5 +277,7 @@ public class PlayerControls extends LinearLayout implements ReactiveButton.Callb
         void playButtonClicked();
 
         void onSubtitleClicked(int id);
+
+        void hwDecButtonClicked();
     }
 }

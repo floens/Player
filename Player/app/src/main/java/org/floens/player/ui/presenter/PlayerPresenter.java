@@ -30,6 +30,7 @@ public class PlayerPresenter implements MpvRenderer.Callback, PropertyObserver, 
     private long propertyMediaTitle;
     private long propertyTrackList;
     private long propertySub;
+    private long propertyHwDec;
     private long eventFileLoaded;
 
     private Playable playable;
@@ -78,6 +79,13 @@ public class PlayerPresenter implements MpvRenderer.Callback, PropertyObserver, 
         }
     }
 
+    public void toggleHwDec() {
+        MpvNode currentHwDecProperty = mpvCore.getProperty("hwdec");
+        boolean isHardwareDecoding = isHardwareDecoding(currentHwDecProperty);
+        String value = isHardwareDecoding ? "no" : "mediacodec";
+        mpvCore.setProperty("hwdec", new MpvNode(MpvNode.FORMAT_STRING, value));
+    }
+
     public void onSeek(float position) {
         double time = totalDuration * position;
         mpvCore.setProperty("time-pos", new MpvNode(MpvNode.FORMAT_DOUBLE, time));
@@ -91,6 +99,7 @@ public class PlayerPresenter implements MpvRenderer.Callback, PropertyObserver, 
         propertyMediaTitle = mpvCore.observeProperty(this, "media-title");
         propertyTrackList = mpvCore.observeProperty(this, "track-list");
         propertySub = mpvCore.observeProperty(this, "sub");
+        propertyHwDec = mpvCore.observeProperty(this, "hwdec");
 
         mpvCore.command(new String[]{
                 "loadfile", fileItem.file.getAbsolutePath()
@@ -109,6 +118,7 @@ public class PlayerPresenter implements MpvRenderer.Callback, PropertyObserver, 
         mpvCore.unobserveProperty(propertyMediaTitle);
         mpvCore.unobserveProperty(propertyTrackList);
         mpvCore.unobserveProperty(propertySub);
+        mpvCore.unobserveProperty(propertyHwDec);
         mpvCore.unobserveEvent(eventFileLoaded);
     }
 
@@ -192,7 +202,17 @@ public class PlayerPresenter implements MpvRenderer.Callback, PropertyObserver, 
                 callback.setActiveSubtitle(activeId);
                 break;
             }
+            case "hwdec": {
+                boolean hardwareDecoding = isHardwareDecoding(property.value);
+                callback.setHardwareDecodingActive(hardwareDecoding);
+
+                break;
+            }
         }
+    }
+
+    private boolean isHardwareDecoding(MpvNode property) {
+        return "mediacodec".equals(property.value);
     }
 
     private String formatTime(long seconds) {
@@ -227,5 +247,7 @@ public class PlayerPresenter implements MpvRenderer.Callback, PropertyObserver, 
         void setSubtitleTracks(List<Track> tracks);
 
         void setActiveSubtitle(int id);
+
+        void setHardwareDecodingActive(boolean hardwareDecodingActive);
     }
 }
