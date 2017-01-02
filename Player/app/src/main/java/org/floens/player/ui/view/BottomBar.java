@@ -220,10 +220,9 @@ public class BottomBar extends View {
 
         public BottomBarItemView(BottomBarItem item) {
             this.item = item;
-            drawable = DrawableCompat.wrap(item.drawable);
+            drawable = DrawableCompat.wrap(item.drawable.mutate());
             text = item.text;
 
-            // TODO: Setting the tint just before drawing it doesn't work
             DrawableCompat.setTint(drawable, color);
         }
 

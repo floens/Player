@@ -92,7 +92,7 @@ static mpv_node *object_to_node(JNIEnv *env, jobject nodeobj) {
 
             const char *valuestr = (*env)->GetStringUTFChars(env, data, 0);
 
-            char *valuestrcpy = malloc(length);
+            char *valuestrcpy = malloc(length + 1);
             strcpy(valuestrcpy, valuestr);
 
             (*env)->ReleaseStringUTFChars(env, data, valuestr);
